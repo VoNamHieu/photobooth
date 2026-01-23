@@ -111,7 +111,7 @@
 
     /* 4x6 Grids */
     .layout-grid2x2 { width: var(--frame-w); }
-    .layout-grid2x2 .photo-grid { grid-template-columns: 1fr 1fr; grid-template-rows: calc(var(--frame-w) * 0.4) calc(var(--frame-w) * 0.4); }
+    .layout-grid2x2 .photo-grid { grid-template-columns: 1fr 1fr; grid-template-rows: calc(var(--frame-w) * 0.5) calc(var(--frame-w) * 0.5); }
 
     .layout-grid3x2 { width: var(--frame-w); }
     .layout-grid3x2 .photo-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: calc(var(--frame-w) * 0.4) calc(var(--frame-w) * 0.4); }
@@ -675,22 +675,10 @@
 
     <div class="bottom-panel">
       <div class="panel active" id="panelFilter"><div class="panel-scroll" id="filterScroll"></div></div>
-      <div class="panel" id="panelTheme"><div class="panel-scroll" id="themeScroll"></div></div>
-      <div class="panel" id="panelLayout"><div class="layout-grid" id="layoutGrid"></div></div>
-      <div class="panel text-panel" id="panelText">
-        <div class="input-row" style="margin-bottom: 10px;">
-          <input type="text" class="input-field" id="headerInput" placeholder="Title / Caption" oninput="updatePreview()">
-          <input type="text" class="input-field" id="footerInput" placeholder="Footer" value="COQUETTE STUDIO" oninput="updatePreview()">
-        </div>
-        <div class="input-row" style="margin-bottom: 10px;">
-          <input type="date" class="input-field" id="dateInput" oninput="updatePreview()" style="flex: 0.6;">
-          <input type="text" class="input-field" id="spotifySong" placeholder="🎵 Song name" oninput="updatePreview()" style="flex: 1;">
-        </div>
-        <div class="input-row">
-          <input type="text" class="input-field" id="spotifyArtist" placeholder="🎤 Artist" oninput="updatePreview()">
-        </div>
-        <div class="color-row" id="colorRow">
-          <span class="color-row-label">Frame Color</span>
+      <div class="panel" id="panelTheme">
+        <div class="panel-scroll" id="themeScroll"></div>
+        <div class="color-row" id="colorRow" style="padding: 10px 16px 0;">
+          <span class="color-row-label">Color</span>
           <div class="color-presets" id="colorPresets">
             <div class="color-preset" style="background:#1a1a1a" data-color="#1a1a1a" onclick="setFrameColor('#1a1a1a')"></div>
             <div class="color-preset" style="background:#ffffff" data-color="#ffffff" onclick="setFrameColor('#ffffff')"></div>
@@ -704,6 +692,28 @@
               <div class="color-picker-btn"></div>
               <input type="color" class="color-picker-input" id="customColorPicker" value="#1a1a1a" onchange="setFrameColor(this.value)">
             </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel" id="panelLayout"><div class="layout-grid" id="layoutGrid"></div></div>
+      <div class="panel text-panel" id="panelText">
+        <!-- Spotify inputs -->
+        <div id="spotifyInputs" style="display:none;">
+          <div class="input-row" style="margin-bottom: 10px;">
+            <input type="text" class="input-field" id="spotifySong" placeholder="🎵 Song name" value="I Wanna Be Yours" oninput="updatePreview()">
+          </div>
+          <div class="input-row">
+            <input type="text" class="input-field" id="spotifyArtist" placeholder="🎤 Artist" value="Arctic Monkeys" oninput="updatePreview()">
+          </div>
+        </div>
+        <!-- Default inputs (Title, Footer, Date) -->
+        <div id="defaultInputs">
+          <div class="input-row" style="margin-bottom: 10px;">
+            <input type="text" class="input-field" id="headerInput" placeholder="Title / Caption" oninput="updatePreview()">
+            <input type="text" class="input-field" id="footerInput" placeholder="Footer" value="COQUETTE STUDIO" oninput="updatePreview()">
+          </div>
+          <div class="input-row">
+            <input type="date" class="input-field" id="dateInput" oninput="updatePreview()">
           </div>
         </div>
       </div>
@@ -744,20 +754,16 @@
 
   <script>
     const themes = [
+      { id: 'white', name: 'White', bg: '#fafafa' },
       { id: 'dark', name: 'Dark', bg: 'linear-gradient(135deg, #1a1a1a, #0d0d0d)' },
       { id: 'cream', name: 'Cream', bg: 'linear-gradient(135deg, #f5efe5, #e8dfd0)' },
       { id: 'pink', name: 'Pink', bg: 'linear-gradient(135deg, #2d1f2f, #1a1218)' },
       { id: 'film', name: 'Film', bg: '#1a1a1a' },
-      { id: 'white', name: 'White', bg: '#fafafa' },
       { id: 'vintage', name: 'Vintage', bg: 'linear-gradient(135deg, #3d2828, #2a1c1c)' },
       { id: 'magic', name: 'Magic', bg: 'linear-gradient(135deg, #1a1a2e, #0f0f1a)' },
-      // New frame themes
       { id: 'xmark', name: 'X-Mark', bg: '#0a0a0a' },
       { id: 'classicbw', name: 'Classic', bg: '#ffffff' },
-      { id: 'yellow', name: 'Yellow', bg: '#f5d800' },
-      { id: 'spotify', name: 'Spotify', bg: '#121212' },
-      { id: 'red', name: 'Red', bg: '#c41e3a' },
-      { id: 'blue', name: 'Blue', bg: '#1a3a5c' },
+      { id: 'spotify', name: 'Spotify', bg: 'linear-gradient(170deg, #1a1a35, #0a0a18)' },
     ];
 
     const layouts = [
@@ -794,13 +800,13 @@
       { id: 'soft', name: 'Soft', css: 'brightness(105%) contrast(90%) saturate(90%)' },
     ];
 
-    // Default to white theme (index 4)
-    let photos = [], theme = themes[4], layout = layouts[1], filter = filters[0];
+    // Default to white theme (index 0)
+    let photos = [], theme = themes[0], layout = layouts[1], filter = filters[0];
     let currentTab = 'filter', stream = null, cameraOn = false, isFullscreen = false;
     let customFrameColor = null;
 
-    // Themes that support custom frame color (basic themes without special overlays)
-    const customColorThemes = ['dark', 'cream', 'pink', 'white', 'red', 'blue', 'yellow', 'spotify'];
+    // Themes that support custom frame color
+    const customColorThemes = ['dark', 'cream', 'pink', 'white', 'spotify'];
     const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
     const fullscreenCamera = document.getElementById('fullscreenCamera');
     const fullscreenVideo = document.getElementById('fullscreenVideo');
@@ -811,7 +817,7 @@
     const filterIndicatorEl = document.getElementById('filterIndicator');
     const miniFramePreview = document.getElementById('miniFramePreview');
 
-    function init() { renderFilters(); renderThemes(); renderLayouts(); updateColorPickerVisibility(); updatePreview(); }
+    function init() { renderFilters(); renderThemes(); renderLayouts(); updateColorPickerVisibility(); toggleTextInputs(); updatePreview(); }
 
     function renderFilters() {
       document.getElementById('filterScroll').innerHTML = filters.map(f =>
@@ -865,12 +871,9 @@
       theme = themes.find(t => t.id === id);
       customFrameColor = null; // Reset custom color when changing theme
       updateColorPickerVisibility();
+      toggleTextInputs();
       renderThemes();
       updatePreview();
-      // Auto switch to Text tab if theme supports custom color
-      if (customColorThemes.includes(theme.id)) {
-        switchTab('text');
-      }
     }
     function selectLayout(id) { layout = layouts.find(l => l.id === id); if (photos.length > layout.slots) photos = photos.slice(0, layout.slots); renderLayouts(); updatePreview(); }
 
@@ -887,6 +890,18 @@
       const colorRow = document.getElementById('colorRow');
       if (colorRow) {
         colorRow.style.display = customColorThemes.includes(theme.id) ? 'flex' : 'none';
+      }
+    }
+
+    function toggleTextInputs() {
+      const spotifyInputs = document.getElementById('spotifyInputs');
+      const defaultInputs = document.getElementById('defaultInputs');
+      if (theme.id === 'spotify') {
+        spotifyInputs.style.display = 'block';
+        defaultInputs.style.display = 'none';
+      } else {
+        spotifyInputs.style.display = 'none';
+        defaultInputs.style.display = 'block';
       }
     }
 
