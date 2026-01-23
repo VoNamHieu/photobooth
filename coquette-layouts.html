@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#000000">
+  <title>Coquette Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Satisfy&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --bg: #000;
+      --surface: #0a0a0a;
+      --surface-2: #151515;
+      --border: rgba(255,255,255,0.1);
+      --text: #fff;
+      --text-2: rgba(255,255,255,0.7);
+      --text-3: rgba(255,255,255,0.4);
+      --accent: #f4a0b0;
+    }
+    html, body { height: 100%; overflow: hidden; }
+    body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); }
+    .app { display: flex; flex-direction: column; height: 100dvh; }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; padding-top: max(10px, env(safe-area-inset-top));
+      background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .header h1 { font-family: 'Playfair Display', serif; font-size: 18px; }
+    .header-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--surface-2); border: none; color: var(--text);
+      font-size: 16px; cursor: pointer;
+    }
+
+    /* Preview */
+    .preview-area {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 12px; overflow: auto; background: #050505;
+    }
+
+    /* Frame */
+    .photo-frame {
+      box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+      position: relative; background: #111; padding: 10px; border-radius: 4px;
+    }
+    .photo-grid { display: grid; gap: 4px; }
+    .photo-slot {
+      position: relative; overflow: hidden;
+      background: rgba(255,255,255,0.1); border-radius: 3px; min-height: 30px;
+    }
+    .photo-slot img, .photo-slot video {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+    }
+    .photo-slot video { transform: scaleX(-1); }
+    .photo-slot .placeholder {
+      position: absolute; inset: 0; display: flex;
+      align-items: center; justify-content: center; font-size: 18px; opacity: 0.3;
+    }
+    .photo-slot .live-badge {
+      position: absolute; top: 4px; left: 4px; background: #ef4444;
+      color: white; font-size: 7px; font-weight: 700; padding: 2px 4px;
+      border-radius: 3px; text-transform: uppercase;
+    }
+    .photo-slot .remove-btn {
+      position: absolute; top: 3px; right: 3px; width: 18px; height: 18px;
+      border-radius: 50%; background: rgba(0,0,0,0.7); border: none;
+      color: #fff; font-size: 9px; cursor: pointer; display: none;
+      align-items: center; justify-content: center;
+    }
+    .photo-slot:hover .remove-btn { display: flex; }
+
+    .countdown-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 600;
+      color: white; text-shadow: 0 0 20px rgba(255,255,255,0.5); z-index: 10;
+    }
+    .countdown-overlay.active { display: flex; }
+    .flash-overlay {
+      position: absolute; inset: 0; background: white;
+      opacity: 0; pointer-events: none; z-index: 20;
+    }
+    .flash-overlay.active { animation: flash 0.15s; }
+    @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+    .frame-footer {
+      margin-top: 8px; text-align: center; font-size: 9px;
+      color: rgba(255,255,255,0.5); letter-spacing: 2px;
+    }
+
+    /* ==================== LAYOUTS ==================== */
+    /* Strip 2x6 */
+    .layout-strip3 { width: 120px; }
+    .layout-strip3 .photo-grid { grid-template-columns: 1fr; grid-template-rows: repeat(3, 75px); }
+
+    .layout-strip4 { width: 120px; }
+    .layout-strip4 .photo-grid { grid-template-columns: 1fr; grid-template-rows: repeat(4, 56px); }
+
+    /* 4x6 Grids */
+    .layout-grid2x2 { width: 240px; }
+    .layout-grid2x2 .photo-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 88px 88px; }
+
+    .layout-grid3x2 { width: 240px; }
+    .layout-grid3x2 .photo-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: 88px 88px; }
+
+    /* 4x6 - 3 poses */
+    .layout-top1-bot2 { width: 240px; }
+    .layout-top1-bot2 .photo-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 115px 65px; }
+    .layout-top1-bot2 .photo-slot:first-child { grid-column: span 2; }
+
+    .layout-top2-bot1 { width: 240px; }
+    .layout-top2-bot1 .photo-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 65px 115px; }
+    .layout-top2-bot1 .photo-slot:last-child { grid-column: span 2; }
+
+    /* 4x6 - 4 poses L/R */
+    .layout-left1-right3 { width: 240px; }
+    .layout-left1-right3 .photo-grid { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 58px); }
+    .layout-left1-right3 .photo-slot:first-child { grid-row: span 3; }
+
+    .layout-left3-right1 { width: 240px; }
+    .layout-left3-right1 .photo-grid { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 58px); }
+    .layout-left3-right1 .photo-slot:nth-child(4) { grid-row: 1 / span 3; grid-column: 2; }
+
+    /* 4x6 - 2 poses */
+    .layout-h2 { width: 240px; }
+    .layout-h2 .photo-grid { grid-template-columns: 1fr; grid-template-rows: 90px 90px; }
+
+    .layout-v2 { width: 240px; }
+    .layout-v2 .photo-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 180px; }
+
+    .layout-big-small { width: 240px; }
+    .layout-big-small .photo-grid { grid-template-columns: 2fr 1fr; grid-template-rows: 180px; }
+
+    .layout-small-big { width: 240px; }
+    .layout-small-big .photo-grid { grid-template-columns: 1fr 2fr; grid-template-rows: 180px; }
+
+    /* 4x6 - 1 pose */
+    .layout-single { width: 240px; }
+    .layout-single .photo-grid { grid-template-columns: 1fr; grid-template-rows: 180px; }
+
+    .layout-portrait { width: 140px; }
+    .layout-portrait .photo-grid { grid-template-columns: 1fr; grid-template-rows: 210px; }
+
+    /* 4x6 - Mixed */
+    .layout-t3-b1 { width: 240px; }
+    .layout-t3-b1 .photo-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: 60px 120px; }
+    .layout-t3-b1 .photo-slot:last-child { grid-column: span 3; }
+
+    .layout-t1-b3 { width: 240px; }
+    .layout-t1-b3 .photo-grid { grid-template-columns: repeat(3, 1fr); grid-template-rows: 120px 60px; }
+    .layout-t1-b3 .photo-slot:first-child { grid-column: span 3; }
+
+    .layout-l2-r2 { width: 240px; }
+    .layout-l2-r2 .photo-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 90px 90px; }
+
+    /* ==================== THEMES ==================== */
+    .theme-dark { background: linear-gradient(180deg, #1a1a1a, #0d0d0d); }
+    .theme-dark .photo-slot { background: rgba(255,255,255,0.08); }
+
+    .theme-cream { background: linear-gradient(180deg, #f5efe5, #e8dfd0); }
+    .theme-cream .photo-slot { background: #d8cbb8; border: 2px solid #c9baa5; }
+    .theme-cream .frame-footer { color: #8a7a6a; }
+
+    .theme-pink { background: linear-gradient(180deg, #2d1f2f, #1a1218); }
+    .theme-pink .photo-slot { background: rgba(244,160,176,0.15); border: 1px solid rgba(244,160,176,0.3); }
+    .theme-pink .frame-footer { color: var(--accent); }
+
+    .theme-film { background: #0a0a0a; padding: 0; border-radius: 0; }
+    .theme-film .film-wrap { background: #1a1a1a; padding: 6px 16px; position: relative; }
+    .theme-film .film-wrap::before, .theme-film .film-wrap::after {
+      content: ''; position: absolute; top: 0; bottom: 0; width: 10px;
+      background: repeating-linear-gradient(to bottom, transparent 0px, transparent 4px, #0a0a0a 4px, #0a0a0a 9px);
+    }
+    .theme-film .film-wrap::before { left: 3px; }
+    .theme-film .film-wrap::after { right: 3px; }
+    .theme-film .photo-slot { background: #f5f5f5; border-radius: 1px; }
+    .theme-film .frame-footer { background: #0a0a0a; padding: 8px; margin-top: 0; font-family: 'Courier New', monospace; color: #666; }
+
+    .theme-white { background: #fafafa; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+    .theme-white .photo-slot { background: #e8e8e8; }
+    .theme-white .frame-footer { color: #333; }
+
+    .theme-vintage { background: linear-gradient(150deg, #3d2828, #2a1c1c); border: 4px solid #4a3535; }
+    .theme-vintage .photo-slot { background: #f0e8dc; border: 2px solid #e0d5c5; border-radius: 0; }
+    .theme-vintage .frame-footer { color: #d4c4b0; }
+
+    .theme-magic { background: linear-gradient(180deg, #1a1a2e, #0f0f1a); position: relative; overflow: visible; }
+    .theme-magic::before {
+      content: ''; position: absolute; inset: -3px; border-radius: 7px;
+      background: linear-gradient(135deg, #ffd700, #ff6b6b, #c678dd, #61afef, #ffd700);
+      z-index: -1; animation: magic-border 3s linear infinite; background-size: 300% 300%;
+    }
+    @keyframes magic-border { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    .theme-magic .photo-slot { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,215,0,0.3); }
+    .theme-magic .frame-footer { font-family: 'Satisfy', cursive; font-size: 14px; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); letter-spacing: 1px; }
+    .theme-magic .mickey { position: absolute; fill: rgba(255,215,0,0.15); filter: drop-shadow(0 0 6px rgba(255,215,0,0.3)); }
+    .theme-magic .mickey-tl { top: -12px; left: -8px; width: 32px; }
+    .theme-magic .mickey-br { bottom: -10px; right: -8px; width: 28px; transform: rotate(15deg); }
+
+    /* ==================== BOTTOM PANEL ==================== */
+    .bottom-panel { background: var(--surface); border-top: 1px solid var(--border); padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+
+    .panel { display: none; padding: 10px 0; border-bottom: 1px solid var(--border); max-height: 130px; overflow-y: auto; }
+    .panel.active { display: block; }
+    .panel-scroll { display: flex; gap: 8px; padding: 0 12px; overflow-x: auto; }
+    .panel-scroll::-webkit-scrollbar { display: none; }
+
+    /* Filter */
+    .filter-item { flex-shrink: 0; width: 54px; text-align: center; cursor: pointer; }
+    .filter-preview {
+      width: 54px; height: 54px; border-radius: 8px;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fad0c4 100%);
+      margin-bottom: 3px; border: 2px solid transparent;
+    }
+    .filter-item.active .filter-preview { border-color: var(--accent); }
+    .filter-item span { font-size: 8px; color: var(--text-3); }
+    .filter-item.active span { color: var(--accent); }
+
+    /* Theme */
+    .theme-item {
+      flex-shrink: 0; width: 58px; padding: 5px; border-radius: 8px;
+      background: var(--surface-2); border: 2px solid transparent;
+      cursor: pointer; text-align: center;
+    }
+    .theme-item.active { border-color: var(--accent); }
+    .theme-preview { width: 100%; height: 36px; border-radius: 5px; margin-bottom: 3px; }
+    .theme-item span { font-size: 8px; color: var(--text-2); }
+
+    /* Layout */
+    .layout-grid { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 12px; }
+    .layout-item {
+      width: 48px; height: 60px; padding: 4px; border-radius: 6px;
+      background: var(--surface-2); border: 2px solid transparent;
+      cursor: pointer; display: flex; flex-direction: column; align-items: center;
+    }
+    .layout-item.active { border-color: var(--accent); }
+    .layout-icon { flex: 1; width: 100%; display: grid; gap: 1px; }
+    .layout-icon div { background: var(--text-3); border-radius: 1px; min-height: 6px; }
+    .layout-item span { font-size: 7px; color: var(--text-3); margin-top: 2px; }
+
+    /* Text */
+    .text-panel { padding: 10px 12px; }
+    .input-row { display: flex; gap: 6px; }
+    .input-field {
+      flex: 1; padding: 8px 10px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--surface-2);
+      color: var(--text); font-size: 12px; font-family: inherit;
+    }
+    .input-field:focus { outline: none; border-color: var(--accent); }
+    .input-field::placeholder { color: var(--text-3); }
+
+    /* Nav */
+    .bottom-nav { display: flex; border-bottom: 1px solid var(--border); }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      gap: 2px; padding: 8px 6px; background: none; border: none;
+      color: var(--text-3); cursor: pointer; font-family: inherit; position: relative;
+    }
+    .nav-item.active { color: var(--accent); }
+    .nav-item.active::after {
+      content: ''; position: absolute; bottom: 0; left: 25%; right: 25%;
+      height: 2px; background: var(--accent);
+    }
+    .nav-item span:first-child { font-size: 16px; }
+    .nav-item span:last-child { font-size: 8px; }
+
+    /* Actions */
+    .action-bar { display: flex; align-items: center; justify-content: space-around; padding: 8px 12px; }
+    .action-btn {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 2px; padding: 6px 12px; background: none; border: none;
+      color: var(--text-2); cursor: pointer; font-family: inherit;
+    }
+    .action-btn span:first-child { font-size: 18px; }
+    .action-btn span:last-child { font-size: 8px; }
+    .capture-btn {
+      width: 54px; height: 54px; border-radius: 50%; background: var(--accent);
+      border: 3px solid rgba(255,255,255,0.2); cursor: pointer;
+      position: relative; box-shadow: 0 4px 16px rgba(244,160,176,0.4);
+    }
+    .capture-btn::after {
+      content: ''; position: absolute; inset: 4px; border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.15);
+    }
+    .capture-btn:disabled { background: var(--surface-2); box-shadow: none; opacity: 0.5; }
+    .capture-btn.recording { animation: pulse-ring 1s infinite; }
+    @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(244,160,176,0.6); } 100% { box-shadow: 0 0 0 10px rgba(244,160,176,0); } }
+
+    #canvas { display: none; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <button class="header-btn" onclick="resetPhotos()">↺</button>
+      <h1>Coquette Studio</h1>
+      <button class="header-btn" onclick="downloadFrame()">⬇</button>
+    </header>
+
+    <div class="preview-area">
+      <div class="photo-frame" id="photoFrame"></div>
+    </div>
+
+    <div class="bottom-panel">
+      <div class="panel active" id="panelFilter"><div class="panel-scroll" id="filterScroll"></div></div>
+      <div class="panel" id="panelTheme"><div class="panel-scroll" id="themeScroll"></div></div>
+      <div class="panel" id="panelLayout"><div class="layout-grid" id="layoutGrid"></div></div>
+      <div class="panel text-panel" id="panelText">
+        <div class="input-row">
+          <input type="text" class="input-field" id="headerInput" placeholder="Title" oninput="updatePreview()">
+          <input type="text" class="input-field" id="footerInput" placeholder="Footer" value="COQUETTE STUDIO" oninput="updatePreview()">
+        </div>
+      </div>
+
+      <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('filter')" id="tabFilter"><span>✨</span><span>Filter</span></button>
+        <button class="nav-item" onclick="switchTab('theme')" id="tabTheme"><span>🎨</span><span>Theme</span></button>
+        <button class="nav-item" onclick="switchTab('layout')" id="tabLayout"><span>⊞</span><span>Layout</span></button>
+        <button class="nav-item" onclick="switchTab('text')" id="tabText"><span>Aa</span><span>Text</span></button>
+      </nav>
+
+      <div class="action-bar">
+        <button class="action-btn" onclick="toggleCamera()"><span id="camIcon">📷</span><span id="camText">Start</span></button>
+        <button class="capture-btn" id="captureBtn" onclick="startCountdown()" disabled></button>
+        <button class="action-btn" onclick="downloadFrame()"><span>💾</span><span>Save</span></button>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const themes = [
+      { id: 'dark', name: 'Dark', bg: 'linear-gradient(135deg, #1a1a1a, #0d0d0d)' },
+      { id: 'cream', name: 'Cream', bg: 'linear-gradient(135deg, #f5efe5, #e8dfd0)' },
+      { id: 'pink', name: 'Pink', bg: 'linear-gradient(135deg, #2d1f2f, #1a1218)' },
+      { id: 'film', name: 'Film', bg: '#1a1a1a' },
+      { id: 'white', name: 'White', bg: '#fafafa' },
+      { id: 'vintage', name: 'Vintage', bg: 'linear-gradient(135deg, #3d2828, #2a1c1c)' },
+      { id: 'magic', name: 'Magic', bg: 'linear-gradient(135deg, #1a1a2e, #0f0f1a)' },
+    ];
+
+    const layouts = [
+      { id: 'strip3', name: 'A', slots: 3, icon: [['1fr'],['1fr'],['1fr']] },
+      { id: 'strip4', name: 'B', slots: 4, icon: [['1fr'],['1fr'],['1fr'],['1fr']] },
+      { id: 'top1-bot2', name: 'C', slots: 3, icon: [['1fr 1fr','span2'],['1fr',''],['','1fr']] },
+      { id: 'grid2x2', name: 'D', slots: 4, icon: [['1fr','1fr'],['1fr','1fr']] },
+      { id: 'left1-right3', name: 'E', slots: 4, icon: [['span3','1fr'],['','1fr'],['','1fr']] },
+      { id: 'top2-bot1', name: 'F', slots: 3, icon: [['1fr','1fr'],['1fr 1fr','span2']] },
+      { id: 'left3-right1', name: 'G', slots: 4, icon: [['1fr','span3'],['1fr',''],['1fr','']] },
+      { id: 'h2', name: 'H', slots: 2, icon: [['1fr'],['1fr']] },
+      { id: 'big-small', name: 'I', slots: 2, icon: [['2fr','1fr']] },
+      { id: 'v2', name: 'J', slots: 2, icon: [['1fr','1fr']] },
+      { id: 'single', name: 'K', slots: 1, icon: [['1fr']] },
+      { id: 'portrait', name: 'L', slots: 1, icon: [['1fr','tall']] },
+      { id: 't3-b1', name: 'M', slots: 4, icon: [['1fr','1fr','1fr'],['span3']] },
+      { id: 't1-b3', name: 'N', slots: 4, icon: [['span3'],['1fr','1fr','1fr']] },
+      { id: 'grid3x2', name: 'O', slots: 6, icon: [['1fr','1fr','1fr'],['1fr','1fr','1fr']] },
+      { id: 'small-big', name: 'P', slots: 2, icon: [['1fr','2fr']] },
+    ];
+
+    const filters = [
+      { id: 'none', name: 'Original', css: 'none' },
+      { id: 'bw', name: 'B&W', css: 'grayscale(100%)' },
+      { id: 'sepia', name: 'Sepia', css: 'sepia(70%)' },
+      { id: 'retro', name: 'Retro', css: 'sepia(40%) contrast(90%)' },
+      { id: 'film', name: 'Film', css: 'sepia(20%) saturate(140%)' },
+      { id: 'fade', name: 'Fade', css: 'contrast(85%) brightness(115%) saturate(75%)' },
+      { id: 'warm', name: 'Warm', css: 'sepia(15%) saturate(130%)' },
+      { id: 'cool', name: 'Cool', css: 'saturate(90%) hue-rotate(15deg)' },
+      { id: 'pink', name: 'Pink', css: 'saturate(120%) hue-rotate(-10deg)' },
+      { id: 'vivid', name: 'Vivid', css: 'saturate(150%) contrast(105%)' },
+      { id: 'noir', name: 'Noir', css: 'grayscale(100%) contrast(130%) brightness(90%)' },
+      { id: 'soft', name: 'Soft', css: 'brightness(105%) contrast(90%) saturate(90%)' },
+    ];
+
+    let photos = [], theme = themes[0], layout = layouts[1], filter = filters[0];
+    let currentTab = 'filter', stream = null, cameraOn = false;
+    const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+
+    function init() { renderFilters(); renderThemes(); renderLayouts(); updatePreview(); }
+
+    function renderFilters() {
+      document.getElementById('filterScroll').innerHTML = filters.map(f =>
+        `<div class="filter-item ${f.id === filter.id ? 'active' : ''}" onclick="selectFilter('${f.id}')">
+          <div class="filter-preview" style="filter:${f.css}"></div><span>${f.name}</span>
+        </div>`).join('');
+    }
+
+    function renderThemes() {
+      document.getElementById('themeScroll').innerHTML = themes.map(t =>
+        `<div class="theme-item ${t.id === theme.id ? 'active' : ''}" onclick="selectTheme('${t.id}')">
+          <div class="theme-preview" style="background:${t.bg}"></div><span>${t.name}</span>
+        </div>`).join('');
+    }
+
+    function renderLayouts() {
+      const icons = {
+        'strip3': '<div style="grid-template-rows:1fr 1fr 1fr"><div></div><div></div><div></div></div>',
+        'strip4': '<div style="grid-template-rows:1fr 1fr 1fr 1fr"><div></div><div></div><div></div><div></div></div>',
+        'grid2x2': '<div style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr"><div></div><div></div><div></div><div></div></div>',
+        'top1-bot2': '<div style="grid-template-columns:1fr 1fr;grid-template-rows:2fr 1fr"><div style="grid-column:span 2"></div><div></div><div></div></div>',
+        'top2-bot1': '<div style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 2fr"><div></div><div></div><div style="grid-column:span 2"></div></div>',
+        'left1-right3': '<div style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1fr"><div style="grid-row:span 3"></div><div></div><div></div><div></div></div>',
+        'left3-right1': '<div style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1fr"><div></div><div style="grid-row:span 3"></div><div></div><div></div></div>',
+        'h2': '<div style="grid-template-rows:1fr 1fr"><div></div><div></div></div>',
+        'v2': '<div style="grid-template-columns:1fr 1fr"><div></div><div></div></div>',
+        'big-small': '<div style="grid-template-columns:2fr 1fr"><div></div><div></div></div>',
+        'small-big': '<div style="grid-template-columns:1fr 2fr"><div></div><div></div></div>',
+        'single': '<div><div></div></div>',
+        'portrait': '<div style="height:100%"><div style="height:100%"></div></div>',
+        't3-b1': '<div style="grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 2fr"><div></div><div></div><div></div><div style="grid-column:span 3"></div></div>',
+        't1-b3': '<div style="grid-template-columns:1fr 1fr 1fr;grid-template-rows:2fr 1fr"><div style="grid-column:span 3"></div><div></div><div></div><div></div></div>',
+        'grid3x2': '<div style="grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr"><div></div><div></div><div></div><div></div><div></div><div></div></div>',
+      };
+      document.getElementById('layoutGrid').innerHTML = layouts.map(l =>
+        `<div class="layout-item ${l.id === layout.id ? 'active' : ''}" onclick="selectLayout('${l.id}')">
+          <div class="layout-icon" style="display:grid;gap:1px">${icons[l.id]}</div><span>${l.name}</span>
+        </div>`).join('');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+      document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
+      document.getElementById('panel' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+    }
+
+    function selectFilter(id) { filter = filters.find(f => f.id === id); renderFilters(); updatePreview(); }
+    function selectTheme(id) { theme = themes.find(t => t.id === id); renderThemes(); updatePreview(); }
+    function selectLayout(id) { layout = layouts.find(l => l.id === id); if (photos.length > layout.slots) photos = photos.slice(0, layout.slots); renderLayouts(); updatePreview(); }
+
+    function updatePreview() {
+      const frame = document.getElementById('photoFrame');
+      frame.className = `photo-frame theme-${theme.id} layout-${layout.id}`;
+      const footer = document.getElementById('footerInput').value || '';
+
+      let slotsHtml = '', liveAdded = false;
+      for (let i = 0; i < layout.slots; i++) {
+        if (photos[i]) {
+          slotsHtml += `<div class="photo-slot"><img src="${photos[i]}" style="filter:${filter.css}"><button class="remove-btn" onclick="removePhoto(${i})">✕</button></div>`;
+        } else if (cameraOn && !liveAdded) {
+          slotsHtml += `<div class="photo-slot" id="liveSlot"><video id="liveVideo" autoplay playsinline muted style="filter:${filter.css}"></video><span class="live-badge">● LIVE</span><div class="countdown-overlay" id="countdown"></div><div class="flash-overlay" id="flash"></div></div>`;
+          liveAdded = true;
+        } else {
+          slotsHtml += `<div class="photo-slot"><span class="placeholder">${i + 1}</span></div>`;
+        }
+      }
+
+      let gridHtml = `<div class="photo-grid">${slotsHtml}</div>`;
+      let footerHtml = footer ? `<div class="frame-footer">${footer}</div>` : '';
+      let magicHtml = theme.id === 'magic' ? `<svg class="mickey mickey-tl" viewBox="0 0 128 128"><circle cx="64" cy="72" r="40"/><circle cx="32" cy="32" r="24"/><circle cx="96" cy="32" r="24"/></svg><svg class="mickey mickey-br" viewBox="0 0 128 128"><circle cx="64" cy="72" r="40"/><circle cx="32" cy="32" r="24"/><circle cx="96" cy="32" r="24"/></svg>` : '';
+
+      if (theme.id === 'film') {
+        frame.innerHTML = `<div class="film-wrap">${gridHtml}</div>${footerHtml}`;
+      } else {
+        frame.innerHTML = `${gridHtml}${footerHtml}${magicHtml}`;
+      }
+
+      if (cameraOn && stream) {
+        const v = document.getElementById('liveVideo');
+        if (v && v.srcObject !== stream) v.srcObject = stream;
+      }
+      document.getElementById('captureBtn').disabled = !cameraOn || photos.length >= layout.slots;
+      document.getElementById('captureBtn').classList.toggle('recording', cameraOn);
+    }
+
+    function removePhoto(i) { photos.splice(i, 1); updatePreview(); }
+    function resetPhotos() { photos = []; updatePreview(); }
+
+    async function toggleCamera() { cameraOn ? stopCamera() : await startCamera(); }
+    async function startCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } });
+        cameraOn = true;
+        document.getElementById('camIcon').textContent = '⏹';
+        document.getElementById('camText').textContent = 'Stop';
+        updatePreview();
+      } catch (e) { alert('Cannot access camera'); }
+    }
+    function stopCamera() {
+      if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+      cameraOn = false;
+      document.getElementById('camIcon').textContent = '📷';
+      document.getElementById('camText').textContent = 'Start';
+      updatePreview();
+    }
+
+    function startCountdown() {
+      if (!cameraOn || photos.length >= layout.slots) return;
+      const el = document.getElementById('countdown');
+      if (!el) return;
+      let n = 3;
+      el.textContent = n;
+      el.classList.add('active');
+      const t = setInterval(() => {
+        n--;
+        if (n > 0) el.textContent = n;
+        else { clearInterval(t); el.classList.remove('active'); capture(); }
+      }, 1000);
+    }
+
+    function capture() {
+      const v = document.getElementById('liveVideo');
+      if (!v) return;
+      canvas.width = v.videoWidth; canvas.height = v.videoHeight;
+      ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
+      ctx.filter = filter.css; ctx.drawImage(v, 0, 0);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      const fl = document.getElementById('flash');
+      if (fl) { fl.classList.add('active'); setTimeout(() => fl.classList.remove('active'), 150); }
+      if (navigator.vibrate) navigator.vibrate(50);
+      photos.push(canvas.toDataURL('image/jpeg', 0.9));
+      updatePreview();
+      if (photos.length >= layout.slots) setTimeout(stopCamera, 500);
+    }
+
+    async function downloadFrame() {
+      if (cameraOn) stopCamera();
+      await new Promise(r => setTimeout(r, 100));
+      try {
+        const out = await html2canvas(document.getElementById('photoFrame'), { scale: 3, useCORS: true, backgroundColor: null });
+        const a = document.createElement('a');
+        a.download = `coquette-${theme.id}-${layout.id}-${Date.now()}.png`;
+        a.href = out.toDataURL('image/png');
+        a.click();
+        if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
+      } catch (e) { alert('Download failed'); }
+    }
+
+    init();
+  </script>
+</body>
+</html>
