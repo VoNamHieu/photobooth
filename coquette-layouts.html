@@ -232,22 +232,36 @@
     .theme-yellow .frame-footer { color: #1a1a1a; font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 2px; font-weight: 600; }
     .theme-yellow .date-stamp { position: absolute; bottom: 6px; left: 10px; color: #1a1a1a; font-size: 10px; letter-spacing: 2px; font-family: 'DM Sans', sans-serif; font-weight: 600; }
 
-    /* Spotify Theme */
-    .theme-spotify { background: #121212; padding: 0; border-radius: 12px; overflow: hidden; }
-    .theme-spotify .photo-grid { border-radius: 8px 8px 0 0; overflow: hidden; }
-    .theme-spotify .photo-slot { background: #282828; border-radius: 0; }
+    /* Spotify Theme - Realistic */
+    .theme-spotify { background: #121212; padding: 0; border-radius: 8px; overflow: hidden; }
+    .theme-spotify .photo-grid { border-radius: 4px 4px 0 0; overflow: hidden; margin: 8px 8px 0 8px; }
+    .theme-spotify .photo-slot { background: #282828; border-radius: 4px; }
     .theme-spotify .frame-footer { display: none; }
-    .theme-spotify .spotify-player { background: #121212; padding: 12px; }
-    .theme-spotify .spotify-song { font-family: 'DM Sans', sans-serif; font-size: 14px; color: #fff; font-weight: 600; margin-bottom: 2px; }
-    .theme-spotify .spotify-artist { font-family: 'DM Sans', sans-serif; font-size: 11px; color: #b3b3b3; margin-bottom: 10px; }
-    .theme-spotify .spotify-progress { height: 4px; background: #4d4d4d; border-radius: 2px; margin-bottom: 10px; position: relative; }
+    .theme-spotify .spotify-player { background: linear-gradient(180deg, #282828 0%, #121212 100%); padding: 12px 14px 16px; display: flex; align-items: center; gap: 12px; }
+    .theme-spotify .spotify-album { width: 56px; height: 56px; border-radius: 4px; background: linear-gradient(135deg, #450af5, #c4efd9); flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    .theme-spotify .spotify-album svg { width: 28px; height: 28px; fill: rgba(255,255,255,0.9); }
+    .theme-spotify .spotify-info { flex: 1; min-width: 0; }
+    .theme-spotify .spotify-track-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
+    .theme-spotify .spotify-song { font-family: 'DM Sans', sans-serif; font-size: 14px; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .theme-spotify .spotify-heart-btn { background: none; border: none; padding: 0; cursor: pointer; flex-shrink: 0; }
+    .theme-spotify .spotify-heart-btn svg { width: 16px; height: 16px; fill: #1db954; }
+    .theme-spotify .spotify-artist { font-family: 'DM Sans', sans-serif; font-size: 11px; color: #b3b3b3; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .theme-spotify .spotify-progress-wrap { display: flex; align-items: center; gap: 6px; }
+    .theme-spotify .spotify-time { font-family: 'DM Sans', sans-serif; font-size: 10px; color: #b3b3b3; min-width: 28px; }
+    .theme-spotify .spotify-time.end { text-align: right; }
+    .theme-spotify .spotify-progress { flex: 1; height: 4px; background: #4d4d4d; border-radius: 2px; position: relative; }
     .theme-spotify .spotify-progress-bar { position: absolute; left: 0; top: 0; height: 100%; width: 35%; background: #1db954; border-radius: 2px; }
-    .theme-spotify .spotify-progress::after { content: ''; position: absolute; left: 35%; top: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: #fff; border-radius: 50%; opacity: 0; transition: opacity 0.2s; }
-    .theme-spotify:hover .spotify-progress::after { opacity: 1; }
-    .theme-spotify .spotify-controls { display: flex; align-items: center; justify-content: center; gap: 20px; }
-    .theme-spotify .spotify-btn { background: none; border: none; color: #b3b3b3; font-size: 16px; cursor: pointer; padding: 4px; }
-    .theme-spotify .spotify-btn.play { background: #fff; color: #000; width: 32px; height: 32px; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; }
-    .theme-spotify .spotify-heart { position: absolute; top: 12px; right: 12px; color: #1db954; font-size: 18px; }
+    .theme-spotify .spotify-progress-dot { position: absolute; left: 35%; top: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: #fff; border-radius: 50%; opacity: 0; transition: opacity 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .theme-spotify:hover .spotify-progress-dot { opacity: 1; }
+    .theme-spotify .spotify-controls { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 8px; }
+    .theme-spotify .spotify-btn { background: none; border: none; color: #b3b3b3; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; transition: color 0.15s, transform 0.15s; }
+    .theme-spotify .spotify-btn:hover { color: #fff; transform: scale(1.05); }
+    .theme-spotify .spotify-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    .theme-spotify .spotify-btn.play { background: #fff; color: #000; width: 32px; height: 32px; border-radius: 50%; }
+    .theme-spotify .spotify-btn.play:hover { transform: scale(1.06); background: #fff; }
+    .theme-spotify .spotify-btn.play svg { width: 16px; height: 16px; fill: #000; margin-left: 2px; }
+    .theme-spotify .spotify-btn.active { color: #1db954; }
+    .theme-spotify .spotify-btn.active svg { fill: #1db954; }
 
     /* Red Theme */
     .theme-red { background: #c41e3a; padding: 10px; }
@@ -316,7 +330,7 @@
     .layout-item span { font-size: 10px; color: var(--text-3); margin-top: 3px; font-weight: 500; }
 
     /* Text */
-    .text-panel { padding: 12px 16px; max-height: 180px; overflow-y: auto; }
+    .text-panel { padding: 12px 16px; max-height: 220px; overflow-y: auto; }
     .input-row { display: flex; gap: 10px; }
     .input-field {
       flex: 1; padding: 12px 14px; border-radius: 10px;
@@ -327,6 +341,29 @@
     .input-field::placeholder { color: var(--text-3); }
     .input-field[type="date"] { color-scheme: dark; }
     .input-field[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+
+    /* Frame Color Picker */
+    .color-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+    .color-row-label { font-size: 12px; color: var(--text-2); min-width: 70px; }
+    .color-presets { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+    .color-preset {
+      width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: transform 0.15s, border-color 0.15s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .color-preset:hover { transform: scale(1.1); }
+    .color-preset.active { border-color: var(--accent); transform: scale(1.1); }
+    .color-picker-wrap { position: relative; }
+    .color-picker-btn {
+      width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+      border: 2px dashed var(--text-3); background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+      transition: transform 0.15s;
+    }
+    .color-picker-btn:hover { transform: scale(1.1); }
+    .color-picker-input {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer;
+    }
 
     /* Nav */
     .bottom-nav { display: flex; border-bottom: 1px solid var(--border); }
@@ -636,6 +673,23 @@
         <div class="input-row">
           <input type="text" class="input-field" id="spotifyArtist" placeholder="🎤 Artist" oninput="updatePreview()">
         </div>
+        <div class="color-row" id="colorRow">
+          <span class="color-row-label">Frame Color</span>
+          <div class="color-presets" id="colorPresets">
+            <div class="color-preset" style="background:#1a1a1a" data-color="#1a1a1a" onclick="setFrameColor('#1a1a1a')"></div>
+            <div class="color-preset" style="background:#ffffff" data-color="#ffffff" onclick="setFrameColor('#ffffff')"></div>
+            <div class="color-preset" style="background:#f5efe5" data-color="#f5efe5" onclick="setFrameColor('#f5efe5')"></div>
+            <div class="color-preset" style="background:#2d1f2f" data-color="#2d1f2f" onclick="setFrameColor('#2d1f2f')"></div>
+            <div class="color-preset" style="background:#c41e3a" data-color="#c41e3a" onclick="setFrameColor('#c41e3a')"></div>
+            <div class="color-preset" style="background:#1a3a5c" data-color="#1a3a5c" onclick="setFrameColor('#1a3a5c')"></div>
+            <div class="color-preset" style="background:#f5d800" data-color="#f5d800" onclick="setFrameColor('#f5d800')"></div>
+            <div class="color-preset" style="background:#1db954" data-color="#1db954" onclick="setFrameColor('#1db954')"></div>
+            <div class="color-picker-wrap">
+              <div class="color-picker-btn"></div>
+              <input type="color" class="color-picker-input" id="customColorPicker" value="#1a1a1a" onchange="setFrameColor(this.value)">
+            </div>
+          </div>
+        </div>
       </div>
 
       <nav class="bottom-nav">
@@ -726,6 +780,10 @@
 
     let photos = [], theme = themes[0], layout = layouts[1], filter = filters[0];
     let currentTab = 'filter', stream = null, cameraOn = false, isFullscreen = false;
+    let customFrameColor = null;
+
+    // Themes that support custom frame color (basic themes without special overlays)
+    const customColorThemes = ['dark', 'cream', 'pink', 'white', 'red', 'blue', 'yellow'];
     const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
     const fullscreenCamera = document.getElementById('fullscreenCamera');
     const fullscreenVideo = document.getElementById('fullscreenVideo');
@@ -736,7 +794,7 @@
     const filterIndicatorEl = document.getElementById('filterIndicator');
     const miniFramePreview = document.getElementById('miniFramePreview');
 
-    function init() { renderFilters(); renderThemes(); renderLayouts(); updatePreview(); }
+    function init() { renderFilters(); renderThemes(); renderLayouts(); updateColorPickerVisibility(); updatePreview(); }
 
     function renderFilters() {
       document.getElementById('filterScroll').innerHTML = filters.map(f =>
@@ -786,8 +844,30 @@
     }
 
     function selectFilter(id) { filter = filters.find(f => f.id === id); renderFilters(); updatePreview(); }
-    function selectTheme(id) { theme = themes.find(t => t.id === id); renderThemes(); updatePreview(); }
+    function selectTheme(id) {
+      theme = themes.find(t => t.id === id);
+      customFrameColor = null; // Reset custom color when changing theme
+      updateColorPickerVisibility();
+      renderThemes();
+      updatePreview();
+    }
     function selectLayout(id) { layout = layouts.find(l => l.id === id); if (photos.length > layout.slots) photos = photos.slice(0, layout.slots); renderLayouts(); updatePreview(); }
+
+    function setFrameColor(color) {
+      customFrameColor = color;
+      document.querySelectorAll('.color-preset').forEach(el => {
+        el.classList.toggle('active', el.dataset.color === color);
+      });
+      document.getElementById('customColorPicker').value = color;
+      updatePreview();
+    }
+
+    function updateColorPickerVisibility() {
+      const colorRow = document.getElementById('colorRow');
+      if (colorRow) {
+        colorRow.style.display = customColorThemes.includes(theme.id) ? 'flex' : 'none';
+      }
+    }
 
     function formatDate(dateStr) {
       if (!dateStr) return '';
@@ -805,6 +885,12 @@
     function updatePreview() {
       const frame = document.getElementById('photoFrame');
       frame.className = `photo-frame theme-${theme.id} layout-${layout.id}`;
+      // Apply custom frame color if set and theme supports it
+      if (customFrameColor && customColorThemes.includes(theme.id)) {
+        frame.style.background = customFrameColor;
+      } else {
+        frame.style.background = '';
+      }
       const footer = document.getElementById('footerInput').value || '';
       const header = document.getElementById('headerInput').value || '';
       const dateVal = document.getElementById('dateInput').value || '';
@@ -843,17 +929,28 @@
         if (dateVal) extraHtml += `<span class="date-stamp">${dateFormatted}</span>`;
       } else if (theme.id === 'spotify') {
         extraHtml = `
-          <span class="spotify-heart">💚</span>
           <div class="spotify-player">
-            <div class="spotify-song">${songName}</div>
-            <div class="spotify-artist">${artistName}</div>
-            <div class="spotify-progress"><div class="spotify-progress-bar"></div></div>
-            <div class="spotify-controls">
-              <button class="spotify-btn">🔀</button>
-              <button class="spotify-btn">⏮</button>
-              <button class="spotify-btn play">⏸</button>
-              <button class="spotify-btn">⏭</button>
-              <button class="spotify-btn">🔁</button>
+            <div class="spotify-album">
+              <svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+            </div>
+            <div class="spotify-info">
+              <div class="spotify-track-row">
+                <div class="spotify-song">${songName}</div>
+                <button class="spotify-heart-btn"><svg viewBox="0 0 16 16"><path d="M15.724 4.22A4.313 4.313 0 0012.192.814a4.269 4.269 0 00-3.622 1.13.837.837 0 01-1.14 0 4.272 4.272 0 00-6.21 5.855l5.916 7.05a1.128 1.128 0 001.727 0l5.916-7.05a4.228 4.228 0 00.945-3.577z"/></svg></button>
+              </div>
+              <div class="spotify-artist">${artistName}</div>
+              <div class="spotify-progress-wrap">
+                <span class="spotify-time">1:24</span>
+                <div class="spotify-progress"><div class="spotify-progress-bar"></div><div class="spotify-progress-dot"></div></div>
+                <span class="spotify-time end">3:21</span>
+              </div>
+              <div class="spotify-controls">
+                <button class="spotify-btn active"><svg viewBox="0 0 16 16"><path d="M13.151.922a.75.75 0 10-1.06 1.06L13.109 3H11.16a3.75 3.75 0 00-2.873 1.34l-6.173 7.356A2.25 2.25 0 01.39 12.5H0V14h.391a3.75 3.75 0 002.873-1.34l6.173-7.356a2.25 2.25 0 011.724-.804h1.947l-1.017 1.018a.75.75 0 001.06 1.06l2.306-2.306a.75.75 0 000-1.06L13.15.922zM.391 3.5H0V2h.391c1.109 0 2.16.49 2.873 1.34L4.89 5.277l-.979 1.167-1.796-2.14A2.25 2.25 0 00.39 3.5z"/><path d="M7.5 10.723l.98-1.167.957 1.14a2.25 2.25 0 001.724.804h1.947l-1.017-1.018a.75.75 0 111.06-1.06l2.306 2.306a.75.75 0 010 1.06l-2.306 2.306a.75.75 0 11-1.06-1.06l1.017-1.018H11.16a3.75 3.75 0 01-2.873-1.34l-.787-.938z"/></svg></button>
+                <button class="spotify-btn"><svg viewBox="0 0 16 16"><path d="M3.3 1a.7.7 0 01.7.7v5.15l9.95-5.744a.7.7 0 011.05.606v12.575a.7.7 0 01-1.05.607L4 9.149V14.3a.7.7 0 01-.7.7H1.7a.7.7 0 01-.7-.7V1.7a.7.7 0 01.7-.7h1.6z"/></svg></button>
+                <button class="spotify-btn play"><svg viewBox="0 0 16 16"><path d="M3 1.713a.7.7 0 011.05-.607l10.89 6.288a.7.7 0 010 1.212L4.05 14.894A.7.7 0 013 14.288V1.713z"/></svg></button>
+                <button class="spotify-btn"><svg viewBox="0 0 16 16"><path d="M12.7 1a.7.7 0 00-.7.7v5.15L2.05 1.107A.7.7 0 001 1.712v12.575a.7.7 0 001.05.607L12 9.149V14.3a.7.7 0 00.7.7h1.6a.7.7 0 00.7-.7V1.7a.7.7 0 00-.7-.7h-1.6z"/></svg></button>
+                <button class="spotify-btn"><svg viewBox="0 0 16 16"><path d="M0 4.75A3.75 3.75 0 013.75 1h8.5A3.75 3.75 0 0116 4.75v5a3.75 3.75 0 01-3.75 3.75H9.81l1.018 1.018a.75.75 0 11-1.06 1.06L6.939 12.75l2.829-2.828a.75.75 0 111.06 1.06L9.811 12h2.439a2.25 2.25 0 002.25-2.25v-5a2.25 2.25 0 00-2.25-2.25h-8.5A2.25 2.25 0 001.5 4.75v5A2.25 2.25 0 003.75 12H5v1.5H3.75A3.75 3.75 0 010 9.75v-5z"/></svg></button>
+              </div>
             </div>
           </div>
         `;
@@ -964,17 +1061,28 @@
         if (dateVal) extraHtml += `<span class="date-stamp">${dateFormatted}</span>`;
       } else if (theme.id === 'spotify') {
         extraHtml = `
-          <span class="spotify-heart">💚</span>
           <div class="spotify-player">
-            <div class="spotify-song">${songName}</div>
-            <div class="spotify-artist">${artistName}</div>
-            <div class="spotify-progress"><div class="spotify-progress-bar"></div></div>
-            <div class="spotify-controls">
-              <button class="spotify-btn">🔀</button>
-              <button class="spotify-btn">⏮</button>
-              <button class="spotify-btn play">⏸</button>
-              <button class="spotify-btn">⏭</button>
-              <button class="spotify-btn">🔁</button>
+            <div class="spotify-album">
+              <svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+            </div>
+            <div class="spotify-info">
+              <div class="spotify-track-row">
+                <div class="spotify-song">${songName}</div>
+                <button class="spotify-heart-btn"><svg viewBox="0 0 16 16"><path d="M15.724 4.22A4.313 4.313 0 0012.192.814a4.269 4.269 0 00-3.622 1.13.837.837 0 01-1.14 0 4.272 4.272 0 00-6.21 5.855l5.916 7.05a1.128 1.128 0 001.727 0l5.916-7.05a4.228 4.228 0 00.945-3.577z"/></svg></button>
+              </div>
+              <div class="spotify-artist">${artistName}</div>
+              <div class="spotify-progress-wrap">
+                <span class="spotify-time">1:24</span>
+                <div class="spotify-progress"><div class="spotify-progress-bar"></div><div class="spotify-progress-dot"></div></div>
+                <span class="spotify-time end">3:21</span>
+              </div>
+              <div class="spotify-controls">
+                <button class="spotify-btn active"><svg viewBox="0 0 16 16"><path d="M13.151.922a.75.75 0 10-1.06 1.06L13.109 3H11.16a3.75 3.75 0 00-2.873 1.34l-6.173 7.356A2.25 2.25 0 01.39 12.5H0V14h.391a3.75 3.75 0 002.873-1.34l6.173-7.356a2.25 2.25 0 011.724-.804h1.947l-1.017 1.018a.75.75 0 001.06 1.06l2.306-2.306a.75.75 0 000-1.06L13.15.922zM.391 3.5H0V2h.391c1.109 0 2.16.49 2.873 1.34L4.89 5.277l-.979 1.167-1.796-2.14A2.25 2.25 0 00.39 3.5z"/><path d="M7.5 10.723l.98-1.167.957 1.14a2.25 2.25 0 001.724.804h1.947l-1.017-1.018a.75.75 0 111.06-1.06l2.306 2.306a.75.75 0 010 1.06l-2.306 2.306a.75.75 0 11-1.06-1.06l1.017-1.018H11.16a3.75 3.75 0 01-2.873-1.34l-.787-.938z"/></svg></button>
+                <button class="spotify-btn"><svg viewBox="0 0 16 16"><path d="M3.3 1a.7.7 0 01.7.7v5.15l9.95-5.744a.7.7 0 011.05.606v12.575a.7.7 0 01-1.05.607L4 9.149V14.3a.7.7 0 01-.7.7H1.7a.7.7 0 01-.7-.7V1.7a.7.7 0 01.7-.7h1.6z"/></svg></button>
+                <button class="spotify-btn play"><svg viewBox="0 0 16 16"><path d="M3 1.713a.7.7 0 011.05-.607l10.89 6.288a.7.7 0 010 1.212L4.05 14.894A.7.7 0 013 14.288V1.713z"/></svg></button>
+                <button class="spotify-btn"><svg viewBox="0 0 16 16"><path d="M12.7 1a.7.7 0 00-.7.7v5.15L2.05 1.107A.7.7 0 001 1.712v12.575a.7.7 0 001.05.607L12 9.149V14.3a.7.7 0 00.7.7h1.6a.7.7 0 00.7-.7V1.7a.7.7 0 00-.7-.7h-1.6z"/></svg></button>
+                <button class="spotify-btn"><svg viewBox="0 0 16 16"><path d="M0 4.75A3.75 3.75 0 013.75 1h8.5A3.75 3.75 0 0116 4.75v5a3.75 3.75 0 01-3.75 3.75H9.81l1.018 1.018a.75.75 0 11-1.06 1.06L6.939 12.75l2.829-2.828a.75.75 0 111.06 1.06L9.811 12h2.439a2.25 2.25 0 002.25-2.25v-5a2.25 2.25 0 00-2.25-2.25h-8.5A2.25 2.25 0 001.5 4.75v5A2.25 2.25 0 003.75 12H5v1.5H3.75A3.75 3.75 0 010 9.75v-5z"/></svg></button>
+              </div>
             </div>
           </div>
         `;
@@ -982,10 +1090,11 @@
       }
 
       let frameHtml = '';
+      const customBg = (customFrameColor && customColorThemes.includes(theme.id)) ? `background:${customFrameColor};` : '';
       if (theme.id === 'film') {
-        frameHtml = `<div class="photo-frame theme-${theme.id} layout-${layout.id}"><div class="film-wrap">${gridHtml}</div>${footerHtml}</div>`;
+        frameHtml = `<div class="photo-frame theme-${theme.id} layout-${layout.id}" style="${customBg}"><div class="film-wrap">${gridHtml}</div>${footerHtml}</div>`;
       } else {
-        frameHtml = `<div class="photo-frame theme-${theme.id} layout-${layout.id}">${gridHtml}${footerHtml}${extraHtml}</div>`;
+        frameHtml = `<div class="photo-frame theme-${theme.id} layout-${layout.id}" style="${customBg}">${gridHtml}${footerHtml}${extraHtml}</div>`;
       }
 
       miniFramePreview.innerHTML = frameHtml;
