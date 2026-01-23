@@ -330,13 +330,20 @@
       background: #000;
       display: none;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     .fullscreen-camera.active { display: flex; }
 
     .fullscreen-video-container {
-      flex: 1;
       position: relative;
+      width: 100%;
+      max-width: 100%;
+      aspect-ratio: 3/4;
+      max-height: calc(100% - 120px);
       overflow: hidden;
+      border-radius: 16px;
+      margin: 10px;
     }
     .fullscreen-video-container video {
       position: absolute;
@@ -370,8 +377,26 @@
       opacity: 0;
       pointer-events: none;
       z-index: 10;
+      border-radius: 16px;
     }
     .fullscreen-flash.active { animation: flash 0.2s; }
+
+    /* Mini Frame Preview */
+    .mini-frame-preview {
+      position: absolute;
+      bottom: 130px;
+      left: 16px;
+      transform-origin: bottom left;
+      transform: scale(0.35);
+      pointer-events: none;
+      opacity: 0.95;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      border-radius: 8px;
+      overflow: visible;
+    }
+    .mini-frame-preview .photo-frame {
+      box-shadow: none;
+    }
 
     .fullscreen-controls {
       position: absolute;
@@ -383,7 +408,7 @@
       align-items: center;
       justify-content: center;
       gap: 24px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
     }
 
     .fullscreen-cancel-btn {
@@ -573,9 +598,10 @@
         <video id="fullscreenVideo" autoplay playsinline muted></video>
         <div class="fullscreen-countdown" id="fullscreenCountdown"></div>
         <div class="fullscreen-flash" id="fullscreenFlash"></div>
-        <div class="fullscreen-filter-indicator" id="filterIndicator">Original</div>
-        <div class="fullscreen-photo-count" id="photoCount">1/4</div>
       </div>
+      <div class="fullscreen-filter-indicator" id="filterIndicator">Original</div>
+      <div class="fullscreen-photo-count" id="photoCount">1/4</div>
+      <div class="mini-frame-preview" id="miniFramePreview"></div>
       <div class="fullscreen-controls">
         <button class="fullscreen-cancel-btn" onclick="exitFullscreenCamera()">✕</button>
         <button class="fullscreen-capture-btn" id="fullscreenCaptureBtn" onclick="fullscreenCapture()"></button>
@@ -641,6 +667,7 @@
     const fullscreenCaptureBtn = document.getElementById('fullscreenCaptureBtn');
     const photoCountEl = document.getElementById('photoCount');
     const filterIndicatorEl = document.getElementById('filterIndicator');
+    const miniFramePreview = document.getElementById('miniFramePreview');
 
     function init() { renderFilters(); renderThemes(); renderLayouts(); updatePreview(); }
 
@@ -765,6 +792,7 @@
       fullscreenVideo.style.filter = filter.css;
       filterIndicatorEl.textContent = filter.name;
       updatePhotoCount();
+      updateMiniFramePreview();
       fullscreenCaptureBtn.disabled = false;
     }
 
@@ -779,6 +807,37 @@
       const current = photos.length + 1;
       const total = layout.slots;
       photoCountEl.textContent = `${current}/${total}`;
+    }
+
+    function updateMiniFramePreview() {
+      const footer = document.getElementById('footerInput').value || '';
+      let slotsHtml = '';
+
+      for (let i = 0; i < layout.slots; i++) {
+        if (photos[i]) {
+          // Already captured photo
+          slotsHtml += `<div class="photo-slot"><img src="${photos[i]}" style="filter:${filter.css}"></div>`;
+        } else if (i === photos.length) {
+          // Current slot - show live indicator
+          slotsHtml += `<div class="photo-slot" style="background:var(--accent);opacity:0.6"><span class="placeholder" style="opacity:1;color:#fff;font-size:10px">LIVE</span></div>`;
+        } else {
+          // Empty future slot
+          slotsHtml += `<div class="photo-slot"><span class="placeholder">${i + 1}</span></div>`;
+        }
+      }
+
+      let gridHtml = `<div class="photo-grid">${slotsHtml}</div>`;
+      let footerHtml = footer ? `<div class="frame-footer">${footer}</div>` : '';
+      let magicHtml = theme.id === 'magic' ? `<svg class="mickey mickey-tl" viewBox="0 0 128 128"><circle cx="64" cy="72" r="40"/><circle cx="32" cy="32" r="24"/><circle cx="96" cy="32" r="24"/></svg><svg class="mickey mickey-br" viewBox="0 0 128 128"><circle cx="64" cy="72" r="40"/><circle cx="32" cy="32" r="24"/><circle cx="96" cy="32" r="24"/></svg>` : '';
+
+      let frameHtml = '';
+      if (theme.id === 'film') {
+        frameHtml = `<div class="photo-frame theme-${theme.id} layout-${layout.id}"><div class="film-wrap">${gridHtml}</div>${footerHtml}</div>`;
+      } else {
+        frameHtml = `<div class="photo-frame theme-${theme.id} layout-${layout.id}">${gridHtml}${footerHtml}${magicHtml}</div>`;
+      }
+
+      miniFramePreview.innerHTML = frameHtml;
     }
 
     function fullscreenCapture() {
@@ -819,6 +878,7 @@
 
       photos.push(canvas.toDataURL('image/jpeg', 0.9));
       updatePhotoCount();
+      updateMiniFramePreview();
 
       // Check if all photos taken
       if (photos.length >= layout.slots) {
