@@ -210,6 +210,57 @@
     .theme-magic .mickey-tl { top: -12px; left: -8px; width: 32px; }
     .theme-magic .mickey-br { bottom: -10px; right: -8px; width: 28px; transform: rotate(15deg); }
 
+    /* ==================== NEW FRAME THEMES ==================== */
+    /* X-Mark Theme */
+    .theme-xmark { background: #0a0a0a; padding: 12px; position: relative; }
+    .theme-xmark .photo-slot { background: #c41e3a; border-radius: 2px; }
+    .theme-xmark .frame-footer { color: rgba(255,255,255,0.6); font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 3px; }
+    .theme-xmark .xmark-icon { position: absolute; top: 8px; right: 8px; font-size: 24px; color: #fff; font-weight: 300; }
+    .theme-xmark .date-stamp { position: absolute; bottom: 8px; left: 12px; color: rgba(255,255,255,0.5); font-size: 10px; letter-spacing: 2px; font-family: 'DM Sans', sans-serif; }
+
+    /* Classic B&W Theme */
+    .theme-classicbw { background: #ffffff; padding: 14px; border: 3px solid #1a1a1a; }
+    .theme-classicbw .photo-slot { background: #e5e5e5; border-radius: 0; }
+    .theme-classicbw .photo-slot img { filter: grayscale(100%) !important; }
+    .theme-classicbw .frame-footer { color: #1a1a1a; font-family: 'Playfair Display', serif; font-size: 9px; letter-spacing: 1px; margin-top: 12px; }
+    .theme-classicbw .text-overlay { position: absolute; top: 10px; left: 0; right: 0; text-align: center; font-size: 8px; color: #1a1a1a; letter-spacing: 2px; text-transform: uppercase; font-family: 'DM Sans', sans-serif; }
+    .theme-classicbw .date-stamp { position: absolute; bottom: 8px; left: 14px; color: #1a1a1a; font-size: 10px; letter-spacing: 2px; font-family: 'DM Sans', sans-serif; }
+
+    /* Yellow Theme */
+    .theme-yellow { background: #f5d800; padding: 10px; }
+    .theme-yellow .photo-slot { background: #d4b800; border-radius: 2px; }
+    .theme-yellow .frame-footer { color: #1a1a1a; font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 2px; font-weight: 600; }
+    .theme-yellow .date-stamp { position: absolute; bottom: 6px; left: 10px; color: #1a1a1a; font-size: 10px; letter-spacing: 2px; font-family: 'DM Sans', sans-serif; font-weight: 600; }
+
+    /* Spotify Theme */
+    .theme-spotify { background: #121212; padding: 0; border-radius: 12px; overflow: hidden; }
+    .theme-spotify .photo-grid { border-radius: 8px 8px 0 0; overflow: hidden; }
+    .theme-spotify .photo-slot { background: #282828; border-radius: 0; }
+    .theme-spotify .frame-footer { display: none; }
+    .theme-spotify .spotify-player { background: #121212; padding: 12px; }
+    .theme-spotify .spotify-song { font-family: 'DM Sans', sans-serif; font-size: 14px; color: #fff; font-weight: 600; margin-bottom: 2px; }
+    .theme-spotify .spotify-artist { font-family: 'DM Sans', sans-serif; font-size: 11px; color: #b3b3b3; margin-bottom: 10px; }
+    .theme-spotify .spotify-progress { height: 4px; background: #4d4d4d; border-radius: 2px; margin-bottom: 10px; position: relative; }
+    .theme-spotify .spotify-progress-bar { position: absolute; left: 0; top: 0; height: 100%; width: 35%; background: #1db954; border-radius: 2px; }
+    .theme-spotify .spotify-progress::after { content: ''; position: absolute; left: 35%; top: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: #fff; border-radius: 50%; opacity: 0; transition: opacity 0.2s; }
+    .theme-spotify:hover .spotify-progress::after { opacity: 1; }
+    .theme-spotify .spotify-controls { display: flex; align-items: center; justify-content: center; gap: 20px; }
+    .theme-spotify .spotify-btn { background: none; border: none; color: #b3b3b3; font-size: 16px; cursor: pointer; padding: 4px; }
+    .theme-spotify .spotify-btn.play { background: #fff; color: #000; width: 32px; height: 32px; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+    .theme-spotify .spotify-heart { position: absolute; top: 12px; right: 12px; color: #1db954; font-size: 18px; }
+
+    /* Red Theme */
+    .theme-red { background: #c41e3a; padding: 10px; }
+    .theme-red .photo-slot { background: #a01830; border-radius: 2px; }
+    .theme-red .frame-footer { color: rgba(255,255,255,0.9); font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 2px; }
+    .theme-red .date-stamp { position: absolute; bottom: 6px; left: 10px; color: rgba(255,255,255,0.7); font-size: 10px; letter-spacing: 2px; }
+
+    /* Blue Theme */
+    .theme-blue { background: linear-gradient(180deg, #1a3a5c, #0d1f33); padding: 10px; }
+    .theme-blue .photo-slot { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .theme-blue .frame-footer { color: rgba(255,255,255,0.8); font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 2px; }
+    .theme-blue .date-stamp { position: absolute; bottom: 6px; left: 10px; color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 2px; }
+
     /* ==================== BOTTOM PANEL ==================== */
     .bottom-panel {
       background: var(--surface);
@@ -265,7 +316,7 @@
     .layout-item span { font-size: 10px; color: var(--text-3); margin-top: 3px; font-weight: 500; }
 
     /* Text */
-    .text-panel { padding: 12px 16px; }
+    .text-panel { padding: 12px 16px; max-height: 180px; overflow-y: auto; }
     .input-row { display: flex; gap: 10px; }
     .input-field {
       flex: 1; padding: 12px 14px; border-radius: 10px;
@@ -274,6 +325,8 @@
     }
     .input-field:focus { outline: none; border-color: var(--accent); }
     .input-field::placeholder { color: var(--text-3); }
+    .input-field[type="date"] { color-scheme: dark; }
+    .input-field[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
 
     /* Nav */
     .bottom-nav { display: flex; border-bottom: 1px solid var(--border); }
@@ -572,9 +625,16 @@
       <div class="panel" id="panelTheme"><div class="panel-scroll" id="themeScroll"></div></div>
       <div class="panel" id="panelLayout"><div class="layout-grid" id="layoutGrid"></div></div>
       <div class="panel text-panel" id="panelText">
-        <div class="input-row">
-          <input type="text" class="input-field" id="headerInput" placeholder="Title" oninput="updatePreview()">
+        <div class="input-row" style="margin-bottom: 10px;">
+          <input type="text" class="input-field" id="headerInput" placeholder="Title / Caption" oninput="updatePreview()">
           <input type="text" class="input-field" id="footerInput" placeholder="Footer" value="COQUETTE STUDIO" oninput="updatePreview()">
+        </div>
+        <div class="input-row" style="margin-bottom: 10px;">
+          <input type="date" class="input-field" id="dateInput" oninput="updatePreview()" style="flex: 0.6;">
+          <input type="text" class="input-field" id="spotifySong" placeholder="🎵 Song name" oninput="updatePreview()" style="flex: 1;">
+        </div>
+        <div class="input-row">
+          <input type="text" class="input-field" id="spotifyArtist" placeholder="🎤 Artist" oninput="updatePreview()">
         </div>
       </div>
 
@@ -621,6 +681,13 @@
       { id: 'white', name: 'White', bg: '#fafafa' },
       { id: 'vintage', name: 'Vintage', bg: 'linear-gradient(135deg, #3d2828, #2a1c1c)' },
       { id: 'magic', name: 'Magic', bg: 'linear-gradient(135deg, #1a1a2e, #0f0f1a)' },
+      // New frame themes
+      { id: 'xmark', name: 'X-Mark', bg: '#0a0a0a' },
+      { id: 'classicbw', name: 'Classic', bg: '#ffffff' },
+      { id: 'yellow', name: 'Yellow', bg: '#f5d800' },
+      { id: 'spotify', name: 'Spotify', bg: '#121212' },
+      { id: 'red', name: 'Red', bg: '#c41e3a' },
+      { id: 'blue', name: 'Blue', bg: '#1a3a5c' },
     ];
 
     const layouts = [
@@ -722,10 +789,27 @@
     function selectTheme(id) { theme = themes.find(t => t.id === id); renderThemes(); updatePreview(); }
     function selectLayout(id) { layout = layouts.find(l => l.id === id); if (photos.length > layout.slots) photos = photos.slice(0, layout.slots); renderLayouts(); updatePreview(); }
 
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2, '0')} ${d.getFullYear()}`;
+    }
+
+    function formatDateNumeric(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return `${String(d.getMonth() + 1).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')} ${d.getFullYear()}`;
+    }
+
     function updatePreview() {
       const frame = document.getElementById('photoFrame');
       frame.className = `photo-frame theme-${theme.id} layout-${layout.id}`;
       const footer = document.getElementById('footerInput').value || '';
+      const header = document.getElementById('headerInput').value || '';
+      const dateVal = document.getElementById('dateInput').value || '';
+      const songName = document.getElementById('spotifySong').value || 'SNOOZE';
+      const artistName = document.getElementById('spotifyArtist').value || 'SZA';
 
       let slotsHtml = '', liveAdded = false;
       for (let i = 0; i < layout.slots; i++) {
@@ -741,12 +825,45 @@
 
       let gridHtml = `<div class="photo-grid">${slotsHtml}</div>`;
       let footerHtml = footer ? `<div class="frame-footer">${footer}</div>` : '';
-      let magicHtml = theme.id === 'magic' ? `<svg class="mickey mickey-tl" viewBox="0 0 128 128"><circle cx="64" cy="72" r="40"/><circle cx="32" cy="32" r="24"/><circle cx="96" cy="32" r="24"/></svg><svg class="mickey mickey-br" viewBox="0 0 128 128"><circle cx="64" cy="72" r="40"/><circle cx="32" cy="32" r="24"/><circle cx="96" cy="32" r="24"/></svg>` : '';
+
+      // Theme-specific elements
+      let extraHtml = '';
+      const dateFormatted = formatDate(dateVal);
+      const dateNumeric = formatDateNumeric(dateVal);
+
+      if (theme.id === 'magic') {
+        extraHtml = `<svg class="mickey mickey-tl" viewBox="0 0 128 128"><circle cx="64" cy="72" r="40"/><circle cx="32" cy="32" r="24"/><circle cx="96" cy="32" r="24"/></svg><svg class="mickey mickey-br" viewBox="0 0 128 128"><circle cx="64" cy="72" r="40"/><circle cx="32" cy="32" r="24"/><circle cx="96" cy="32" r="24"/></svg>`;
+      } else if (theme.id === 'xmark') {
+        extraHtml = `<span class="xmark-icon">✕</span>`;
+        if (dateVal) extraHtml += `<span class="date-stamp">${dateNumeric}</span>`;
+      } else if (theme.id === 'classicbw') {
+        if (header) extraHtml += `<span class="text-overlay">${header}</span>`;
+        if (dateVal) extraHtml += `<span class="date-stamp">${dateFormatted}</span>`;
+      } else if (theme.id === 'yellow' || theme.id === 'red' || theme.id === 'blue') {
+        if (dateVal) extraHtml += `<span class="date-stamp">${dateFormatted}</span>`;
+      } else if (theme.id === 'spotify') {
+        extraHtml = `
+          <span class="spotify-heart">💚</span>
+          <div class="spotify-player">
+            <div class="spotify-song">${songName}</div>
+            <div class="spotify-artist">${artistName}</div>
+            <div class="spotify-progress"><div class="spotify-progress-bar"></div></div>
+            <div class="spotify-controls">
+              <button class="spotify-btn">🔀</button>
+              <button class="spotify-btn">⏮</button>
+              <button class="spotify-btn play">⏸</button>
+              <button class="spotify-btn">⏭</button>
+              <button class="spotify-btn">🔁</button>
+            </div>
+          </div>
+        `;
+        footerHtml = ''; // Hide footer for Spotify theme
+      }
 
       if (theme.id === 'film') {
         frame.innerHTML = `<div class="film-wrap">${gridHtml}</div>${footerHtml}`;
       } else {
-        frame.innerHTML = `${gridHtml}${footerHtml}${magicHtml}`;
+        frame.innerHTML = `${gridHtml}${footerHtml}${extraHtml}`;
       }
 
       if (cameraOn && stream) {
@@ -811,30 +928,64 @@
 
     function updateMiniFramePreview() {
       const footer = document.getElementById('footerInput').value || '';
+      const header = document.getElementById('headerInput').value || '';
+      const dateVal = document.getElementById('dateInput').value || '';
+      const songName = document.getElementById('spotifySong').value || 'SNOOZE';
+      const artistName = document.getElementById('spotifyArtist').value || 'SZA';
       let slotsHtml = '';
 
       for (let i = 0; i < layout.slots; i++) {
         if (photos[i]) {
-          // Already captured photo
           slotsHtml += `<div class="photo-slot"><img src="${photos[i]}" style="filter:${filter.css}"></div>`;
         } else if (i === photos.length) {
-          // Current slot - show live indicator
           slotsHtml += `<div class="photo-slot" style="background:var(--accent);opacity:0.6"><span class="placeholder" style="opacity:1;color:#fff;font-size:10px">LIVE</span></div>`;
         } else {
-          // Empty future slot
           slotsHtml += `<div class="photo-slot"><span class="placeholder">${i + 1}</span></div>`;
         }
       }
 
       let gridHtml = `<div class="photo-grid">${slotsHtml}</div>`;
       let footerHtml = footer ? `<div class="frame-footer">${footer}</div>` : '';
-      let magicHtml = theme.id === 'magic' ? `<svg class="mickey mickey-tl" viewBox="0 0 128 128"><circle cx="64" cy="72" r="40"/><circle cx="32" cy="32" r="24"/><circle cx="96" cy="32" r="24"/></svg><svg class="mickey mickey-br" viewBox="0 0 128 128"><circle cx="64" cy="72" r="40"/><circle cx="32" cy="32" r="24"/><circle cx="96" cy="32" r="24"/></svg>` : '';
+
+      // Theme-specific elements for mini preview
+      let extraHtml = '';
+      const dateFormatted = formatDate(dateVal);
+      const dateNumeric = formatDateNumeric(dateVal);
+
+      if (theme.id === 'magic') {
+        extraHtml = `<svg class="mickey mickey-tl" viewBox="0 0 128 128"><circle cx="64" cy="72" r="40"/><circle cx="32" cy="32" r="24"/><circle cx="96" cy="32" r="24"/></svg><svg class="mickey mickey-br" viewBox="0 0 128 128"><circle cx="64" cy="72" r="40"/><circle cx="32" cy="32" r="24"/><circle cx="96" cy="32" r="24"/></svg>`;
+      } else if (theme.id === 'xmark') {
+        extraHtml = `<span class="xmark-icon">✕</span>`;
+        if (dateVal) extraHtml += `<span class="date-stamp">${dateNumeric}</span>`;
+      } else if (theme.id === 'classicbw') {
+        if (header) extraHtml += `<span class="text-overlay">${header}</span>`;
+        if (dateVal) extraHtml += `<span class="date-stamp">${dateFormatted}</span>`;
+      } else if (theme.id === 'yellow' || theme.id === 'red' || theme.id === 'blue') {
+        if (dateVal) extraHtml += `<span class="date-stamp">${dateFormatted}</span>`;
+      } else if (theme.id === 'spotify') {
+        extraHtml = `
+          <span class="spotify-heart">💚</span>
+          <div class="spotify-player">
+            <div class="spotify-song">${songName}</div>
+            <div class="spotify-artist">${artistName}</div>
+            <div class="spotify-progress"><div class="spotify-progress-bar"></div></div>
+            <div class="spotify-controls">
+              <button class="spotify-btn">🔀</button>
+              <button class="spotify-btn">⏮</button>
+              <button class="spotify-btn play">⏸</button>
+              <button class="spotify-btn">⏭</button>
+              <button class="spotify-btn">🔁</button>
+            </div>
+          </div>
+        `;
+        footerHtml = '';
+      }
 
       let frameHtml = '';
       if (theme.id === 'film') {
         frameHtml = `<div class="photo-frame theme-${theme.id} layout-${layout.id}"><div class="film-wrap">${gridHtml}</div>${footerHtml}</div>`;
       } else {
-        frameHtml = `<div class="photo-frame theme-${theme.id} layout-${layout.id}">${gridHtml}${footerHtml}${magicHtml}</div>`;
+        frameHtml = `<div class="photo-frame theme-${theme.id} layout-${layout.id}">${gridHtml}${footerHtml}${extraHtml}</div>`;
       }
 
       miniFramePreview.innerHTML = frameHtml;
