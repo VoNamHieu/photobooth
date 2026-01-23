@@ -805,8 +805,8 @@
     let currentTab = 'filter', stream = null, cameraOn = false, isFullscreen = false;
     let customFrameColor = null;
 
-    // Themes that support custom frame color
-    const customColorThemes = ['dark', 'cream', 'pink', 'white', 'spotify'];
+    // Themes that support custom frame color (not spotify - has its own gradient)
+    const customColorThemes = ['dark', 'cream', 'pink', 'white'];
     const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
     const fullscreenCamera = document.getElementById('fullscreenCamera');
     const fullscreenVideo = document.getElementById('fullscreenVideo');
