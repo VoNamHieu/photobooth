@@ -322,6 +322,132 @@
 
     #canvas { display: none; }
 
+    /* ==================== FULLSCREEN CAMERA ==================== */
+    .fullscreen-camera {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: #000;
+      display: none;
+      flex-direction: column;
+    }
+    .fullscreen-camera.active { display: flex; }
+
+    .fullscreen-video-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .fullscreen-video-container video {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+
+    .fullscreen-countdown {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 120px;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 0 40px rgba(255,255,255,0.5), 0 0 80px rgba(0,0,0,0.8);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .fullscreen-countdown.active { opacity: 1; }
+
+    .fullscreen-flash {
+      position: absolute;
+      inset: 0;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .fullscreen-flash.active { animation: flash 0.2s; }
+
+    .fullscreen-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      padding: 20px;
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    }
+
+    .fullscreen-cancel-btn {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+    .fullscreen-cancel-btn:active { background: rgba(255,255,255,0.3); }
+
+    .fullscreen-capture-btn {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 5px solid rgba(255,255,255,0.4);
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 4px 30px rgba(244,160,176,0.6);
+    }
+    .fullscreen-capture-btn::after {
+      content: '';
+      position: absolute;
+      inset: 6px;
+      border-radius: 50%;
+      border: 3px solid rgba(0,0,0,0.15);
+    }
+    .fullscreen-capture-btn:active { transform: scale(0.95); }
+    .fullscreen-capture-btn:disabled { background: #666; box-shadow: none; opacity: 0.5; }
+
+    .fullscreen-photo-count {
+      position: absolute;
+      top: 20px;
+      top: max(20px, env(safe-area-inset-top));
+      right: 20px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+    }
+
+    .fullscreen-filter-indicator {
+      position: absolute;
+      top: 20px;
+      top: max(20px, env(safe-area-inset-top));
+      left: 20px;
+      background: rgba(0,0,0,0.6);
+      color: var(--accent);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+    }
+
     /* ==================== MEDIA QUERIES ==================== */
     /* Small phones (< 360px) */
     @media (max-width: 359px) {
@@ -443,6 +569,22 @@
 
   <canvas id="canvas"></canvas>
 
+  <!-- Fullscreen Camera Overlay -->
+  <div class="fullscreen-camera" id="fullscreenCamera">
+    <div class="fullscreen-video-container">
+      <video id="fullscreenVideo" autoplay playsinline muted></video>
+      <div class="fullscreen-countdown" id="fullscreenCountdown"></div>
+      <div class="fullscreen-flash" id="fullscreenFlash"></div>
+      <div class="fullscreen-filter-indicator" id="filterIndicator">Original</div>
+      <div class="fullscreen-photo-count" id="photoCount">1/4</div>
+    </div>
+    <div class="fullscreen-controls">
+      <button class="fullscreen-cancel-btn" onclick="exitFullscreenCamera()">✕</button>
+      <button class="fullscreen-capture-btn" id="fullscreenCaptureBtn" onclick="fullscreenCapture()"></button>
+      <div style="width:50px"></div>
+    </div>
+  </div>
+
   <script>
     const themes = [
       { id: 'dark', name: 'Dark', bg: 'linear-gradient(135deg, #1a1a1a, #0d0d0d)' },
@@ -489,8 +631,15 @@
     ];
 
     let photos = [], theme = themes[0], layout = layouts[1], filter = filters[0];
-    let currentTab = 'filter', stream = null, cameraOn = false;
+    let currentTab = 'filter', stream = null, cameraOn = false, isFullscreen = false;
     const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+    const fullscreenCamera = document.getElementById('fullscreenCamera');
+    const fullscreenVideo = document.getElementById('fullscreenVideo');
+    const fullscreenCountdown = document.getElementById('fullscreenCountdown');
+    const fullscreenFlash = document.getElementById('fullscreenFlash');
+    const fullscreenCaptureBtn = document.getElementById('fullscreenCaptureBtn');
+    const photoCountEl = document.getElementById('photoCount');
+    const filterIndicatorEl = document.getElementById('filterIndicator');
 
     function init() { renderFilters(); renderThemes(); renderLayouts(); updatePreview(); }
 
@@ -594,6 +743,7 @@
       } catch (e) { alert('Cannot access camera'); }
     }
     function stopCamera() {
+      if (isFullscreen) exitFullscreenCamera();
       if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
       cameraOn = false;
       document.getElementById('camIcon').textContent = '📷';
@@ -603,18 +753,88 @@
 
     function startCountdown() {
       if (!cameraOn || photos.length >= layout.slots) return;
-      const el = document.getElementById('countdown');
-      if (!el) return;
+      // Open fullscreen camera mode
+      openFullscreenCamera();
+    }
+
+    function openFullscreenCamera() {
+      isFullscreen = true;
+      fullscreenCamera.classList.add('active');
+      fullscreenVideo.srcObject = stream;
+      fullscreenVideo.style.filter = filter.css;
+      filterIndicatorEl.textContent = filter.name;
+      updatePhotoCount();
+      fullscreenCaptureBtn.disabled = false;
+    }
+
+    function exitFullscreenCamera() {
+      isFullscreen = false;
+      fullscreenCamera.classList.remove('active');
+      fullscreenCountdown.classList.remove('active');
+      updatePreview();
+    }
+
+    function updatePhotoCount() {
+      const current = photos.length + 1;
+      const total = layout.slots;
+      photoCountEl.textContent = `${current}/${total}`;
+    }
+
+    function fullscreenCapture() {
+      if (photos.length >= layout.slots) return;
+      fullscreenCaptureBtn.disabled = true;
+
+      // Start countdown
       let n = 3;
-      el.textContent = n;
-      el.classList.add('active');
+      fullscreenCountdown.textContent = n;
+      fullscreenCountdown.classList.add('active');
+
       const t = setInterval(() => {
         n--;
-        if (n > 0) el.textContent = n;
-        else { clearInterval(t); el.classList.remove('active'); capture(); }
+        if (n > 0) {
+          fullscreenCountdown.textContent = n;
+        } else {
+          clearInterval(t);
+          fullscreenCountdown.classList.remove('active');
+          doCapture();
+        }
       }, 1000);
     }
 
+    function doCapture() {
+      canvas.width = fullscreenVideo.videoWidth;
+      canvas.height = fullscreenVideo.videoHeight;
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.filter = filter.css;
+      ctx.drawImage(fullscreenVideo, 0, 0);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+      // Flash effect
+      fullscreenFlash.classList.add('active');
+      setTimeout(() => fullscreenFlash.classList.remove('active'), 200);
+
+      if (navigator.vibrate) navigator.vibrate(50);
+
+      photos.push(canvas.toDataURL('image/jpeg', 0.9));
+      updatePhotoCount();
+
+      // Check if all photos taken
+      if (photos.length >= layout.slots) {
+        // All done - exit fullscreen and stop camera
+        setTimeout(() => {
+          exitFullscreenCamera();
+          stopCamera();
+        }, 500);
+      } else {
+        // Re-enable capture button for next photo
+        setTimeout(() => {
+          fullscreenCaptureBtn.disabled = false;
+        }, 300);
+      }
+    }
+
+    // Legacy capture function (not used in fullscreen mode)
     function capture() {
       const v = document.getElementById('liveVideo');
       if (!v) return;
