@@ -22,7 +22,7 @@
     }
     html, body { height: 100%; overflow: hidden; }
     body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--bg); color: var(--text); }
-    .app { display: flex; flex-direction: column; height: 100dvh; }
+    .app { display: flex; flex-direction: column; height: 100dvh; position: relative; }
 
     /* Header */
     .header {
@@ -324,7 +324,7 @@
 
     /* ==================== FULLSCREEN CAMERA ==================== */
     .fullscreen-camera {
-      position: fixed;
+      position: absolute;
       inset: 0;
       z-index: 1000;
       background: #000;
@@ -526,6 +526,7 @@
         margin: 20px;
       }
       .photo-frame { --frame-w: 320px; }
+      .fullscreen-camera { border-radius: 24px; }
     }
   </style>
 </head>
@@ -565,25 +566,25 @@
         <button class="action-btn" onclick="downloadFrame()"><span>💾</span><span>Save</span></button>
       </div>
     </div>
+
+    <!-- Fullscreen Camera Overlay (inside app container) -->
+    <div class="fullscreen-camera" id="fullscreenCamera">
+      <div class="fullscreen-video-container">
+        <video id="fullscreenVideo" autoplay playsinline muted></video>
+        <div class="fullscreen-countdown" id="fullscreenCountdown"></div>
+        <div class="fullscreen-flash" id="fullscreenFlash"></div>
+        <div class="fullscreen-filter-indicator" id="filterIndicator">Original</div>
+        <div class="fullscreen-photo-count" id="photoCount">1/4</div>
+      </div>
+      <div class="fullscreen-controls">
+        <button class="fullscreen-cancel-btn" onclick="exitFullscreenCamera()">✕</button>
+        <button class="fullscreen-capture-btn" id="fullscreenCaptureBtn" onclick="fullscreenCapture()"></button>
+        <div style="width:50px"></div>
+      </div>
+    </div>
   </div>
 
   <canvas id="canvas"></canvas>
-
-  <!-- Fullscreen Camera Overlay -->
-  <div class="fullscreen-camera" id="fullscreenCamera">
-    <div class="fullscreen-video-container">
-      <video id="fullscreenVideo" autoplay playsinline muted></video>
-      <div class="fullscreen-countdown" id="fullscreenCountdown"></div>
-      <div class="fullscreen-flash" id="fullscreenFlash"></div>
-      <div class="fullscreen-filter-indicator" id="filterIndicator">Original</div>
-      <div class="fullscreen-photo-count" id="photoCount">1/4</div>
-    </div>
-    <div class="fullscreen-controls">
-      <button class="fullscreen-cancel-btn" onclick="exitFullscreenCamera()">✕</button>
-      <button class="fullscreen-capture-btn" id="fullscreenCaptureBtn" onclick="fullscreenCapture()"></button>
-      <div style="width:50px"></div>
-    </div>
-  </div>
 
   <script>
     const themes = [
