@@ -44,13 +44,9 @@
     /* Preview */
     .preview-area {
       flex: 1; display: flex; align-items: center; justify-content: center;
-      padding: 16px; padding-bottom: 80px; overflow: auto; background: #050505;
+      padding: 12px; overflow: auto; background: #050505;
       min-height: 0; /* Allow shrinking */
       position: relative;
-    }
-    .bottom-panel.collapsed ~ .preview-area,
-    .app:has(.bottom-panel.collapsed) .preview-area {
-      padding-bottom: 80px;
     }
 
     /* Virtual background canvas */
@@ -68,6 +64,8 @@
     .photo-frame {
       box-shadow: 0 10px 50px rgba(0,0,0,0.8);
       position: relative; background: #111; padding: 10px; border-radius: 4px;
+      transition: transform 0.3s ease;
+      transform-origin: center center;
     }
     .photo-grid { display: grid; gap: 4px; }
     .photo-slot {
@@ -141,8 +139,8 @@
     }
 
     /* ==================== LAYOUTS ==================== */
-    /* Responsive frame sizing */
-    .photo-frame { --frame-w: min(70vw, 280px); }
+    /* Responsive frame sizing - larger by default */
+    .photo-frame { --frame-w: min(85vw, 340px); }
 
     /* Strip 2x6 */
     .layout-strip3 { width: calc(var(--frame-w) * 0.5); }
@@ -380,20 +378,19 @@
 
     /* ==================== BOTTOM PANEL ==================== */
     .bottom-panel {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(10, 10, 10, 0.95);
+      background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid var(--border);
+      border-top: 1px solid rgba(255,255,255,0.08);
       padding-bottom: max(8px, env(safe-area-inset-bottom));
-      z-index: 100;
-      transition: transform 0.3s ease;
+      flex-shrink: 0;
+      transition: max-height 0.3s ease, opacity 0.2s ease;
+      max-height: 280px;
+      overflow: hidden;
+      position: relative;
     }
     .bottom-panel.collapsed {
-      transform: translateY(calc(100% - 70px));
+      max-height: 70px;
     }
     .bottom-panel.collapsed .panel,
     .bottom-panel.collapsed .bottom-nav {
@@ -402,26 +399,21 @@
     }
 
     .panel-toggle {
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 40px;
-      height: 20px;
-      background: rgba(10, 10, 10, 0.9);
-      border: 1px solid var(--border);
-      border-bottom: none;
-      border-radius: 10px 10px 0 0;
+      width: 100%;
+      height: 24px;
+      background: transparent;
+      border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--text-3);
-      font-size: 10px;
+      font-size: 12px;
       transition: color 0.2s;
     }
     .panel-toggle:hover { color: var(--text); }
-    .bottom-panel.collapsed .panel-toggle { transform: translateX(-50%) rotate(180deg); top: -20px; }
+    .panel-toggle span { transition: transform 0.3s ease; display: inline-block; }
+    .bottom-panel.collapsed .panel-toggle span { transform: rotate(180deg); }
 
     .panel { display: none; padding: 6px 0; border-bottom: 1px solid var(--border); max-height: 90px; overflow-y: auto; transition: opacity 0.2s; }
     .panel.active { display: block; }
@@ -823,7 +815,7 @@
     </div>
 
     <div class="bottom-panel" id="bottomPanel">
-      <div class="panel-toggle" onclick="togglePanel()">▼</div>
+      <div class="panel-toggle" onclick="togglePanel()"><span>▼</span></div>
       <div class="panel active" id="panelFilter"><div class="panel-scroll" id="filterScroll"></div></div>
       <div class="panel" id="panelTheme">
         <div class="panel-scroll" id="themeScroll"></div>
@@ -1209,7 +1201,7 @@
       panel.classList.toggle('collapsed', panelCollapsed);
     }
 
-    // Auto-collapse panel when tapping on preview area
+    // Auto-collapse panel when tapping on preview area (optional - can remove)
     document.addEventListener('click', (e) => {
       const previewArea = document.querySelector('.preview-area');
       const bottomPanel = document.getElementById('bottomPanel');
