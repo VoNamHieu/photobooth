@@ -45,6 +45,60 @@
       flex: 1; display: flex; align-items: center; justify-content: center;
       padding: 16px; overflow: auto; background: #050505;
       min-height: 0; /* Allow shrinking */
+      position: relative;
+    }
+
+    /* Background patterns */
+    .preview-area.bg-none { background: #050505; }
+    .preview-area.bg-yellow { background: #f5d800; }
+    .preview-area.bg-pink { background: #ffb6c1; }
+    .preview-area.bg-blue { background: #87ceeb; }
+    .preview-area.bg-green { background: #90ee90; }
+    .preview-area.bg-purple { background: #dda0dd; }
+    .preview-area.bg-orange { background: #ffa500; }
+    .preview-area.bg-white { background: #f5f5f5; }
+    .preview-area.bg-black { background: #1a1a1a; }
+
+    /* Text pattern backgrounds */
+    .preview-area.bg-pattern-times {
+      background-color: #f5f5f0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='10' y='40' font-family='Arial Black, sans-serif' font-size='50' font-weight='900' fill='%23e5e5e0' transform='rotate(-15 100 50)'%3ETIMES%3C/text%3E%3Ctext x='10' y='90' font-family='Arial Black, sans-serif' font-size='50' font-weight='900' fill='%23e5e5e0' transform='rotate(-15 100 50)'%3ETIMES%3C/text%3E%3C/svg%3E");
+      background-size: 180px 90px;
+    }
+    .preview-area.bg-pattern-love {
+      background-color: #fff0f5;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='10' y='40' font-family='Arial Black, sans-serif' font-size='50' font-weight='900' fill='%23ffe4e8' transform='rotate(-15 100 50)'%3ELOVE%3C/text%3E%3Ctext x='10' y='90' font-family='Arial Black, sans-serif' font-size='50' font-weight='900' fill='%23ffe4e8' transform='rotate(-15 100 50)'%3ELOVE%3C/text%3E%3C/svg%3E");
+      background-size: 180px 90px;
+    }
+    .preview-area.bg-pattern-xoxo {
+      background-color: #fff5f5;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='10' y='40' font-family='Arial Black, sans-serif' font-size='50' font-weight='900' fill='%23ffe0e0' transform='rotate(-15 100 50)'%3EXOXO%3C/text%3E%3Ctext x='10' y='90' font-family='Arial Black, sans-serif' font-size='50' font-weight='900' fill='%23ffe0e0' transform='rotate(-15 100 50)'%3EXOXO%3C/text%3E%3C/svg%3E");
+      background-size: 180px 90px;
+    }
+    .preview-area.bg-pattern-smile {
+      background-color: #fffacd;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='10' y='40' font-family='Arial Black, sans-serif' font-size='45' font-weight='900' fill='%23f0e68c' transform='rotate(-15 100 50)'%3ESMILE%3C/text%3E%3Ctext x='10' y='90' font-family='Arial Black, sans-serif' font-size='45' font-weight='900' fill='%23f0e68c' transform='rotate(-15 100 50)'%3ESMILE%3C/text%3E%3C/svg%3E");
+      background-size: 180px 90px;
+    }
+    .preview-area.bg-pattern-happy {
+      background-color: #e6ffe6;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='10' y='40' font-family='Arial Black, sans-serif' font-size='45' font-weight='900' fill='%23c8f7c8' transform='rotate(-15 100 50)'%3EHAPPY%3C/text%3E%3Ctext x='10' y='90' font-family='Arial Black, sans-serif' font-size='45' font-weight='900' fill='%23c8f7c8' transform='rotate(-15 100 50)'%3EHAPPY%3C/text%3E%3C/svg%3E");
+      background-size: 180px 90px;
+    }
+    .preview-area.bg-pattern-party {
+      background-color: #f0e6ff;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='10' y='40' font-family='Arial Black, sans-serif' font-size='45' font-weight='900' fill='%23dcc8ff' transform='rotate(-15 100 50)'%3EPARTY%3C/text%3E%3Ctext x='10' y='90' font-family='Arial Black, sans-serif' font-size='45' font-weight='900' fill='%23dcc8ff' transform='rotate(-15 100 50)'%3EPARTY%3C/text%3E%3C/svg%3E");
+      background-size: 180px 90px;
+    }
+    .preview-area.bg-pattern-star {
+      background-color: #fffaf0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ctext x='15' y='40' font-size='30' fill='%23ffe4c4'%3E★%3C/text%3E%3C/svg%3E");
+      background-size: 60px 60px;
+    }
+    .preview-area.bg-pattern-heart {
+      background-color: #fff0f5;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ctext x='15' y='40' font-size='30' fill='%23ffb6c1'%3E♥%3C/text%3E%3C/svg%3E");
+      background-size: 60px 60px;
     }
 
     /* Frame */
@@ -377,6 +431,22 @@
     .theme-item.active { border-color: var(--accent); }
     .theme-preview { width: 100%; height: 32px; border-radius: 5px; margin-bottom: 3px; }
     .theme-item span { font-size: 9px; color: var(--text-2); font-weight: 500; }
+
+    /* Background */
+    .bg-item {
+      flex-shrink: 0; width: 56px; padding: 5px; border-radius: 8px;
+      background: var(--surface-2); border: 2px solid transparent;
+      cursor: pointer; text-align: center; transition: border-color 0.2s;
+    }
+    .bg-item:active { opacity: 0.8; }
+    .bg-item.active { border-color: var(--accent); }
+    .bg-preview { width: 100%; height: 32px; border-radius: 5px; margin-bottom: 3px; position: relative; overflow: hidden; }
+    .bg-item span { font-size: 9px; color: var(--text-2); font-weight: 500; }
+    .bg-preview-pattern {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 6px; font-weight: 900; color: rgba(0,0,0,0.15); letter-spacing: -0.5px;
+      transform: rotate(-15deg); line-height: 1;
+    }
 
     /* Layout */
     .layout-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px; justify-content: flex-start; }
@@ -742,6 +812,7 @@
           </div>
         </div>
       </div>
+      <div class="panel" id="panelBg"><div class="panel-scroll" id="bgScroll"></div></div>
       <div class="panel" id="panelLayout"><div class="layout-grid" id="layoutGrid"></div></div>
       <div class="panel text-panel" id="panelText">
         <!-- Spotify inputs -->
@@ -781,6 +852,7 @@
       <nav class="bottom-nav">
         <button class="nav-item active" onclick="switchTab('filter')" id="tabFilter"><span>✨</span><span>Filter</span></button>
         <button class="nav-item" onclick="switchTab('theme')" id="tabTheme"><span>🎨</span><span>Theme</span></button>
+        <button class="nav-item" onclick="switchTab('bg')" id="tabBg"><span>🖼</span><span>BG</span></button>
         <button class="nav-item" onclick="switchTab('layout')" id="tabLayout"><span>⊞</span><span>Layout</span></button>
         <button class="nav-item" onclick="switchTab('text')" id="tabText"><span>Aa</span><span>Text</span></button>
       </nav>
@@ -861,8 +933,27 @@
       { id: 'soft', name: 'Soft', css: 'brightness(105%) contrast(90%) saturate(90%)' },
     ];
 
+    const backgrounds = [
+      { id: 'none', name: 'None', color: '#050505', pattern: null },
+      { id: 'yellow', name: 'Yellow', color: '#f5d800', pattern: null },
+      { id: 'pink', name: 'Pink', color: '#ffb6c1', pattern: null },
+      { id: 'blue', name: 'Blue', color: '#87ceeb', pattern: null },
+      { id: 'green', name: 'Green', color: '#90ee90', pattern: null },
+      { id: 'purple', name: 'Purple', color: '#dda0dd', pattern: null },
+      { id: 'orange', name: 'Orange', color: '#ffa500', pattern: null },
+      { id: 'white', name: 'White', color: '#f5f5f5', pattern: null },
+      { id: 'pattern-times', name: 'TIMES', color: '#f5f5f0', pattern: 'TIMES' },
+      { id: 'pattern-love', name: 'LOVE', color: '#fff0f5', pattern: 'LOVE' },
+      { id: 'pattern-xoxo', name: 'XOXO', color: '#fff5f5', pattern: 'XOXO' },
+      { id: 'pattern-smile', name: 'SMILE', color: '#fffacd', pattern: 'SMILE' },
+      { id: 'pattern-happy', name: 'HAPPY', color: '#e6ffe6', pattern: 'HAPPY' },
+      { id: 'pattern-party', name: 'PARTY', color: '#f0e6ff', pattern: 'PARTY' },
+      { id: 'pattern-star', name: 'Stars', color: '#fffaf0', pattern: '★' },
+      { id: 'pattern-heart', name: 'Hearts', color: '#fff0f5', pattern: '♥' },
+    ];
+
     // Default to white theme (index 0)
-    let photos = [], theme = themes[0], layout = layouts[1], filter = filters[0];
+    let photos = [], theme = themes[0], layout = layouts[1], filter = filters[0], background = backgrounds[0];
     let currentTab = 'filter', stream = null, cameraOn = false, isFullscreen = false;
     let customFrameColor = null;
 
@@ -878,7 +969,7 @@
     const filterIndicatorEl = document.getElementById('filterIndicator');
     const miniFramePreview = document.getElementById('miniFramePreview');
 
-    function init() { renderFilters(); renderThemes(); renderLayouts(); updateColorPickerVisibility(); toggleTextInputs(); updatePreview(); }
+    function init() { renderFilters(); renderThemes(); renderBackgrounds(); renderLayouts(); updateColorPickerVisibility(); toggleTextInputs(); updatePreview(); }
 
     function renderFilters() {
       document.getElementById('filterScroll').innerHTML = filters.map(f =>
@@ -892,6 +983,32 @@
         `<div class="theme-item ${t.id === theme.id ? 'active' : ''}" onclick="selectTheme('${t.id}')">
           <div class="theme-preview" style="background:${t.bg}"></div><span>${t.name}</span>
         </div>`).join('');
+    }
+
+    function renderBackgrounds() {
+      document.getElementById('bgScroll').innerHTML = backgrounds.map(b => {
+        let previewContent = '';
+        if (b.pattern) {
+          previewContent = `<div class="bg-preview-pattern">${b.pattern}</div>`;
+        }
+        return `<div class="bg-item ${b.id === background.id ? 'active' : ''}" onclick="selectBackground('${b.id}')">
+          <div class="bg-preview" style="background:${b.color}">${previewContent}</div><span>${b.name}</span>
+        </div>`;
+      }).join('');
+    }
+
+    function selectBackground(id) {
+      background = backgrounds.find(b => b.id === id);
+      renderBackgrounds();
+      updatePreviewBackground();
+    }
+
+    function updatePreviewBackground() {
+      const previewArea = document.querySelector('.preview-area');
+      // Remove all bg classes
+      previewArea.className = previewArea.className.replace(/\bbg-\S+/g, '').trim();
+      previewArea.classList.add('preview-area');
+      previewArea.classList.add('bg-' + background.id);
     }
 
     function renderLayouts() {
@@ -992,6 +1109,7 @@
     function updatePreview() {
       const frame = document.getElementById('photoFrame');
       frame.className = `photo-frame theme-${theme.id} layout-${layout.id}`;
+      updatePreviewBackground();
       // Apply custom frame color if set and theme supports it
       if (customFrameColor && customColorThemes.includes(theme.id)) {
         frame.style.background = customFrameColor;
