@@ -727,7 +727,7 @@
     /* ==================== MEDIA QUERIES ==================== */
     /* Small phones (< 360px) */
     @media (max-width: 359px) {
-      .photo-frame { --frame-w: min(85vw, 260px); }
+      .photo-frame { --frame-w: min(95vw, 320px); }
       .header h1 { font-size: 16px; }
       .filter-item { width: 56px; }
       .filter-preview { width: 48px; height: 48px; }
@@ -741,12 +741,12 @@
 
     /* Medium phones (360px - 414px) */
     @media (min-width: 360px) and (max-width: 414px) {
-      .photo-frame { --frame-w: min(75vw, 280px); }
+      .photo-frame { --frame-w: min(95vw, 380px); }
     }
 
     /* Large phones (> 414px) */
     @media (min-width: 415px) {
-      .photo-frame { --frame-w: min(70vw, 320px); }
+      .photo-frame { --frame-w: min(95vw, 420px); }
       .filter-item { width: 72px; }
       .filter-preview { width: 64px; height: 64px; }
       .theme-item { width: 76px; }
@@ -758,7 +758,7 @@
     /* Landscape mode */
     @media (orientation: landscape) and (max-height: 500px) {
       .preview-area { padding: 8px; }
-      .photo-frame { --frame-w: min(40vh, 200px); }
+      .photo-frame { --frame-w: min(50vh, 260px); }
       .panel { max-height: 100px; padding: 8px 0; }
       .nav-item { padding: 8px 6px; min-height: 40px; }
       .action-bar { padding: 8px 12px; }
@@ -768,7 +768,7 @@
 
     /* Very short screens (notch phones in landscape) */
     @media (max-height: 600px) and (orientation: portrait) {
-      .photo-frame { --frame-w: min(60vw, 240px); }
+      .photo-frame { --frame-w: min(85vw, 320px); }
       .panel { max-height: 110px; }
     }
 
@@ -789,7 +789,7 @@
         box-shadow: 0 0 60px rgba(0,0,0,0.5);
         overflow: hidden;
       }
-      .photo-frame { --frame-w: 280px; }
+      .photo-frame { --frame-w: 350px; }
       .preview-area { padding: 24px; }
     }
 
@@ -801,7 +801,7 @@
         border-radius: 24px;
         margin: 20px;
       }
-      .photo-frame { --frame-w: 320px; }
+      .photo-frame { --frame-w: 400px; }
       .fullscreen-camera { border-radius: 24px; }
     }
   </style>
