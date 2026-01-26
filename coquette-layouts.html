@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#000000">
   <title>Coquette Studio</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Satisfy&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Satisfy&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -296,6 +296,45 @@
     .theme-blue .photo-slot { background: rgba(255,255,255,0.1); border-radius: 2px; }
     .theme-blue .frame-footer { color: rgba(255,255,255,0.8); font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 2px; }
     .theme-blue .date-stamp { position: absolute; bottom: 6px; left: 10px; color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 2px; }
+
+    /* Newspaper Theme */
+    .theme-newspaper {
+      background: #f5f0e6; padding: 0; border-radius: 4px;
+      width: calc(var(--frame-w) * 0.55);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .theme-newspaper .newspaper-header {
+      padding: 10px 12px 8px; border-bottom: 2px solid #1a1a1a; text-align: center;
+    }
+    .theme-newspaper .newspaper-title {
+      font-family: 'UnifrakturMaguntia', serif; font-size: 22px; color: #1a1a1a;
+      margin-bottom: 6px; line-height: 1;
+    }
+    .theme-newspaper .newspaper-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 7px; color: #555; text-transform: uppercase; letter-spacing: 1px;
+      padding: 0 4px; border-top: 1px solid #1a1a1a; border-bottom: 1px solid #1a1a1a;
+      margin: 4px 0; padding: 3px 4px;
+    }
+    .theme-newspaper .newspaper-headline {
+      font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 600;
+      color: #1a1a1a; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .theme-newspaper .photo-grid {
+      gap: 4px; padding: 10px 12px;
+      grid-template-columns: 1fr !important;
+      grid-template-rows: repeat(3, calc(var(--frame-w) * 0.28)) !important;
+    }
+    .theme-newspaper .photo-slot {
+      background: #d5cfc2; border-radius: 0; border: 1px solid #c5bfb2;
+    }
+    .theme-newspaper .photo-slot img { filter: grayscale(100%) contrast(110%); }
+    .theme-newspaper .photo-slot:nth-child(n+4) { display: none; }
+    .theme-newspaper .frame-footer {
+      background: #1a1a1a; color: #f5f0e6; text-align: center;
+      font-size: 8px; letter-spacing: 2px; padding: 6px; margin-top: 0;
+      font-family: 'DM Sans', sans-serif; text-transform: uppercase;
+    }
 
     /* ==================== BOTTOM PANEL ==================== */
     .bottom-panel {
@@ -714,6 +753,19 @@
             <input type="text" class="input-field" id="spotifyArtist" placeholder="🎤 Artist" value="Arctic Monkeys" oninput="updatePreview()">
           </div>
         </div>
+        <!-- Newspaper inputs -->
+        <div id="newspaperInputs" style="display:none;">
+          <div class="input-row" style="margin-bottom: 10px;">
+            <input type="text" class="input-field" id="newspaperHeadline" placeholder="📰 Headline" value="MIKHA AT 21!" oninput="updatePreview()">
+          </div>
+          <div class="input-row" style="margin-bottom: 10px;">
+            <input type="text" class="input-field" id="newspaperDate" placeholder="📅 Date" value="NOV. 8, 2024" oninput="updatePreview()">
+            <input type="text" class="input-field" id="newspaperLocation" placeholder="📍 Location" value="WHITESPACE MANILA" oninput="updatePreview()">
+          </div>
+          <div class="input-row">
+            <input type="text" class="input-field" id="newspaperEdition" placeholder="Edition" value="BIRTHDAY EDITION" oninput="updatePreview()">
+          </div>
+        </div>
         <!-- Default inputs (Title, Footer, Date) -->
         <div id="defaultInputs">
           <div class="input-row" style="margin-bottom: 10px;">
@@ -772,6 +824,7 @@
       { id: 'xmark', name: 'X-Mark', bg: '#0a0a0a' },
       { id: 'classicbw', name: 'Classic', bg: '#ffffff' },
       { id: 'spotify', name: 'Spotify', bg: 'linear-gradient(170deg, #1a1a35, #0a0a18)' },
+      { id: 'newspaper', name: 'News', bg: '#f5f0e6' },
     ];
 
     const layouts = [
@@ -903,12 +956,16 @@
 
     function toggleTextInputs() {
       const spotifyInputs = document.getElementById('spotifyInputs');
+      const newspaperInputs = document.getElementById('newspaperInputs');
       const defaultInputs = document.getElementById('defaultInputs');
+      spotifyInputs.style.display = 'none';
+      newspaperInputs.style.display = 'none';
+      defaultInputs.style.display = 'none';
       if (theme.id === 'spotify') {
         spotifyInputs.style.display = 'block';
-        defaultInputs.style.display = 'none';
+      } else if (theme.id === 'newspaper') {
+        newspaperInputs.style.display = 'block';
       } else {
-        spotifyInputs.style.display = 'none';
         defaultInputs.style.display = 'block';
       }
     }
@@ -927,8 +984,8 @@
     }
 
     function getEffectiveSlots() {
-      // Spotify theme always uses 3 slots
-      if (theme.id === 'spotify') return 3;
+      // Spotify and Newspaper themes always use 3 slots
+      if (theme.id === 'spotify' || theme.id === 'newspaper') return 3;
       return layout.slots;
     }
 
@@ -946,6 +1003,10 @@
       const dateVal = document.getElementById('dateInput').value || '';
       const songName = document.getElementById('spotifySong').value || 'SNOOZE';
       const artistName = document.getElementById('spotifyArtist').value || 'SZA';
+      const newsHeadline = document.getElementById('newspaperHeadline').value || 'HEADLINE HERE';
+      const newsDate = document.getElementById('newspaperDate').value || 'DATE';
+      const newsLocation = document.getElementById('newspaperLocation').value || 'LOCATION';
+      const newsEdition = document.getElementById('newspaperEdition').value || 'SPECIAL EDITION';
 
       const effectiveSlots = getEffectiveSlots();
       let slotsHtml = '', liveAdded = false;
@@ -1003,6 +1064,19 @@
 
       if (theme.id === 'film') {
         frame.innerHTML = `<div class="film-wrap">${gridHtml}</div>${footerHtml}`;
+      } else if (theme.id === 'newspaper') {
+        frame.innerHTML = `
+          <div class="newspaper-header">
+            <div class="newspaper-title">The Birthday Times</div>
+            <div class="newspaper-meta">
+              <span>${newsDate}</span>
+              <span>${newsLocation}</span>
+            </div>
+            <div class="newspaper-headline">${newsHeadline}</div>
+          </div>
+          ${gridHtml}
+          <div class="frame-footer">${newsEdition}</div>
+        `;
       } else {
         frame.innerHTML = `${gridHtml}${footerHtml}${extraHtml}`;
       }
@@ -1073,6 +1147,10 @@
       const dateVal = document.getElementById('dateInput').value || '';
       const songName = document.getElementById('spotifySong').value || 'SNOOZE';
       const artistName = document.getElementById('spotifyArtist').value || 'SZA';
+      const newsHeadline = document.getElementById('newspaperHeadline').value || 'HEADLINE HERE';
+      const newsDate = document.getElementById('newspaperDate').value || 'DATE';
+      const newsLocation = document.getElementById('newspaperLocation').value || 'LOCATION';
+      const newsEdition = document.getElementById('newspaperEdition').value || 'SPECIAL EDITION';
       const effectiveSlots = getEffectiveSlots();
       let slotsHtml = '';
 
@@ -1131,6 +1209,16 @@
       const customBg = (customFrameColor && customColorThemes.includes(theme.id)) ? `background:${customFrameColor};` : '';
       if (theme.id === 'film') {
         frameHtml = `<div class="photo-frame theme-${theme.id} layout-${layout.id}" style="${customBg}"><div class="film-wrap">${gridHtml}</div>${footerHtml}</div>`;
+      } else if (theme.id === 'newspaper') {
+        frameHtml = `<div class="photo-frame theme-${theme.id} layout-${layout.id}" style="${customBg}">
+          <div class="newspaper-header">
+            <div class="newspaper-title">The Birthday Times</div>
+            <div class="newspaper-meta"><span>${newsDate}</span><span>${newsLocation}</span></div>
+            <div class="newspaper-headline">${newsHeadline}</div>
+          </div>
+          ${gridHtml}
+          <div class="frame-footer">${newsEdition}</div>
+        </div>`;
       } else {
         frameHtml = `<div class="photo-frame theme-${theme.id} layout-${layout.id}" style="${customBg}">${gridHtml}${footerHtml}${extraHtml}</div>`;
       }
