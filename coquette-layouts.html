@@ -67,6 +67,10 @@
       transition: transform 0.3s ease;
       transform-origin: center center;
     }
+    /* Scale up frame when panel is collapsed */
+    .app:has(.bottom-panel.collapsed) .photo-frame {
+      transform: scale(1.15);
+    }
     .photo-grid { display: grid; gap: 4px; }
     .photo-slot {
       position: relative; overflow: hidden;
