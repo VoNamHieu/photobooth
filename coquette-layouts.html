@@ -378,8 +378,10 @@
 
     /* ==================== BOTTOM PANEL ==================== */
     .bottom-panel {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.08);
       padding-bottom: max(8px, env(safe-area-inset-bottom));
       flex-shrink: 0;
       transition: max-height 0.3s ease, opacity 0.2s ease;
