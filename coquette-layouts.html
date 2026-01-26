@@ -840,10 +840,12 @@
       </nav>
 
       <div class="action-bar">
+        <button class="action-btn" onclick="triggerUpload()"><span>📤</span><span>Upload</span></button>
         <button class="action-btn" onclick="toggleCamera()"><span id="camIcon">📷</span><span id="camText">Start</span></button>
         <button class="capture-btn" id="captureBtn" onclick="startCountdown()" disabled></button>
         <button class="action-btn" onclick="downloadFrame()"><span>💾</span><span>Save</span></button>
       </div>
+      <input type="file" id="imageUpload" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
     </div>
 
     <!-- Fullscreen Camera Overlay (inside app container) -->
@@ -1670,6 +1672,178 @@
         a.click();
         if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
       } catch (e) { alert('Download failed'); }
+    }
+
+    // ==================== IMAGE UPLOAD & BACKGROUND REMOVAL ====================
+    function triggerUpload() {
+      if (photos.length >= getEffectiveSlots()) {
+        alert('Frame is full! Remove a photo first.');
+        return;
+      }
+      document.getElementById('imageUpload').click();
+    }
+
+    async function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // Reset input for re-upload
+      event.target.value = '';
+
+      // Show loading indicator
+      const loadingOverlay = showUploadLoading();
+
+      try {
+        const img = await loadImage(file);
+
+        if (virtualBg.type !== 'none' && segmentationReady) {
+          // Process with background removal
+          const processedDataUrl = await processUploadedImage(img);
+          photos.push(processedDataUrl);
+        } else {
+          // Just add the image as-is (with filter applied)
+          const dataUrl = await applyFilterToImage(img);
+          photos.push(dataUrl);
+        }
+
+        updatePreview();
+        if (navigator.vibrate) navigator.vibrate(50);
+      } catch (e) {
+        console.error('Upload failed:', e);
+        alert('Failed to process image');
+      } finally {
+        hideUploadLoading(loadingOverlay);
+      }
+    }
+
+    function loadImage(file) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    function showUploadLoading() {
+      const overlay = document.createElement('div');
+      overlay.id = 'uploadLoading';
+      overlay.style.cssText = `
+        position: fixed; inset: 0; z-index: 9999;
+        background: rgba(0,0,0,0.8); display: flex;
+        flex-direction: column; align-items: center; justify-content: center;
+        color: white; font-family: inherit;
+      `;
+      overlay.innerHTML = `
+        <div style="font-size: 40px; margin-bottom: 16px;">⏳</div>
+        <div style="font-size: 16px; font-weight: 500;">Removing background...</div>
+        <div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 8px;">This may take a few seconds</div>
+      `;
+      document.body.appendChild(overlay);
+      return overlay;
+    }
+
+    function hideUploadLoading(overlay) {
+      if (overlay && overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
+    }
+
+    async function processUploadedImage(img) {
+      return new Promise(async (resolve, reject) => {
+        try {
+          // Create canvas for processing
+          const processCanvas = document.createElement('canvas');
+          const processCtx = processCanvas.getContext('2d');
+          processCanvas.width = img.width;
+          processCanvas.height = img.height;
+
+          // Create a one-time segmentation handler
+          const tempSegmentation = new SelfieSegmentation({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+          });
+          tempSegmentation.setOptions({ modelSelection: 1, selfieMode: true });
+
+          tempSegmentation.onResults((results) => {
+            const w = processCanvas.width;
+            const h = processCanvas.height;
+
+            // Create mask canvas
+            const maskCanvas = document.createElement('canvas');
+            const maskCtx = maskCanvas.getContext('2d', { willReadFrequently: true });
+            maskCanvas.width = w;
+            maskCanvas.height = h;
+
+            // Draw and process mask
+            maskCtx.drawImage(results.segmentationMask, 0, 0, w, h);
+            const imageData = maskCtx.getImageData(0, 0, w, h);
+            const data = imageData.data;
+            const threshold = maskThreshold * 255;
+
+            for (let i = 0; i < data.length; i += 4) {
+              const maskValue = data[i];
+              if (maskValue > threshold) {
+                data[i] = data[i + 1] = data[i + 2] = 255;
+                data[i + 3] = 255;
+              } else if (maskValue > threshold * 0.5) {
+                const alpha = (maskValue - threshold * 0.5) / (threshold * 0.5);
+                data[i] = data[i + 1] = data[i + 2] = 255;
+                data[i + 3] = Math.round(alpha * 255);
+              } else {
+                data[i] = data[i + 1] = data[i + 2] = 0;
+                data[i + 3] = 0;
+              }
+            }
+            maskCtx.putImageData(imageData, 0, 0);
+
+            // Draw background
+            drawVirtualBackground(processCtx, w, h);
+
+            // Create person layer with mask
+            const personCanvas = document.createElement('canvas');
+            personCanvas.width = w;
+            personCanvas.height = h;
+            const personCtx = personCanvas.getContext('2d');
+
+            personCtx.drawImage(results.image, 0, 0, w, h);
+            personCtx.globalCompositeOperation = 'destination-in';
+            personCtx.filter = `blur(${edgeBlur / 2}px)`;
+            personCtx.drawImage(maskCanvas, 0, 0, w, h);
+
+            // Composite person on background
+            processCtx.drawImage(personCanvas, 0, 0);
+
+            // Apply filter
+            if (filter.css !== 'none') {
+              const finalCanvas = document.createElement('canvas');
+              finalCanvas.width = w;
+              finalCanvas.height = h;
+              const finalCtx = finalCanvas.getContext('2d');
+              finalCtx.filter = filter.css;
+              finalCtx.drawImage(processCanvas, 0, 0);
+              resolve(finalCanvas.toDataURL('image/jpeg', 0.9));
+            } else {
+              resolve(processCanvas.toDataURL('image/jpeg', 0.9));
+            }
+
+            tempSegmentation.close();
+          });
+
+          await tempSegmentation.send({ image: img });
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }
+
+    async function applyFilterToImage(img) {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.filter = filter.css;
+      ctx.drawImage(img, 0, 0);
+      return canvas.toDataURL('image/jpeg', 0.9);
     }
 
     init();
