@@ -44,9 +44,13 @@
     /* Preview */
     .preview-area {
       flex: 1; display: flex; align-items: center; justify-content: center;
-      padding: 16px; overflow: auto; background: #050505;
+      padding: 16px; padding-bottom: 80px; overflow: auto; background: #050505;
       min-height: 0; /* Allow shrinking */
       position: relative;
+    }
+    .bottom-panel.collapsed ~ .preview-area,
+    .app:has(.bottom-panel.collapsed) .preview-area {
+      padding-bottom: 80px;
     }
 
     /* Virtual background canvas */
@@ -109,6 +113,31 @@
       margin-top: 10px; text-align: center; font-size: 10px;
       color: rgba(255,255,255,0.5); letter-spacing: 1.5px;
       font-weight: 500;
+    }
+
+    /* Tap-to-edit text elements */
+    .editable-text {
+      cursor: text;
+      border: 1px dashed transparent;
+      padding: 2px 4px;
+      margin: -2px -4px;
+      border-radius: 3px;
+      transition: border-color 0.2s, background 0.2s;
+      min-width: 20px;
+      display: inline-block;
+    }
+    .editable-text:hover {
+      border-color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.05);
+    }
+    .editable-text:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: rgba(255,255,255,0.1);
+    }
+    .editable-text:empty::before {
+      content: attr(data-placeholder);
+      opacity: 0.4;
     }
 
     /* ==================== LAYOUTS ==================== */
@@ -351,15 +380,50 @@
 
     /* ==================== BOTTOM PANEL ==================== */
     .bottom-panel {
-      background: var(--surface);
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-top: 1px solid var(--border);
       padding-bottom: max(8px, env(safe-area-inset-bottom));
-      flex-shrink: 0;
-      max-height: 45vh; /* Limit bottom panel to 45% of viewport */
-      overflow: hidden;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+    .bottom-panel.collapsed {
+      transform: translateY(calc(100% - 70px));
+    }
+    .bottom-panel.collapsed .panel,
+    .bottom-panel.collapsed .bottom-nav {
+      opacity: 0;
+      pointer-events: none;
     }
 
-    .panel { display: none; padding: 6px 0; border-bottom: 1px solid var(--border); max-height: 90px; overflow-y: auto; }
+    .panel-toggle {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 20px;
+      background: rgba(10, 10, 10, 0.9);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 10px 10px 0 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-3);
+      font-size: 10px;
+      transition: color 0.2s;
+    }
+    .panel-toggle:hover { color: var(--text); }
+    .bottom-panel.collapsed .panel-toggle { transform: translateX(-50%) rotate(180deg); top: -20px; }
+
+    .panel { display: none; padding: 6px 0; border-bottom: 1px solid var(--border); max-height: 90px; overflow-y: auto; transition: opacity 0.2s; }
     .panel.active { display: block; }
     .panel-scroll { display: flex; gap: 10px; padding: 0 16px; overflow-x: auto; scroll-snap-type: x mandatory; }
     .panel-scroll::-webkit-scrollbar { display: none; }
@@ -758,7 +822,8 @@
       <div class="photo-frame" id="photoFrame"></div>
     </div>
 
-    <div class="bottom-panel">
+    <div class="bottom-panel" id="bottomPanel">
+      <div class="panel-toggle" onclick="togglePanel()">▼</div>
       <div class="panel active" id="panelFilter"><div class="panel-scroll" id="filterScroll"></div></div>
       <div class="panel" id="panelTheme">
         <div class="panel-scroll" id="themeScroll"></div>
@@ -780,7 +845,21 @@
           </div>
         </div>
       </div>
-      <div class="panel" id="panelBg"><div class="panel-scroll" id="bgScroll"></div></div>
+      <div class="panel" id="panelBg">
+        <div class="panel-scroll" id="bgScroll"></div>
+        <div class="vbg-settings" id="vbgSettings" style="display:none; padding: 8px 16px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+            <span style="font-size:11px; color:var(--text-2); min-width:60px;">Smooth</span>
+            <input type="range" id="edgeBlurSlider" min="0" max="20" value="8" style="flex:1; accent-color:var(--accent);" oninput="edgeBlur=parseInt(this.value)">
+            <span style="font-size:10px; color:var(--text-3); width:24px;" id="blurValue">8</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:11px; color:var(--text-2); min-width:60px;">Precision</span>
+            <input type="range" id="thresholdSlider" min="40" max="90" value="65" style="flex:1; accent-color:var(--accent);" oninput="maskThreshold=parseInt(this.value)/100">
+            <span style="font-size:10px; color:var(--text-3); width:24px;" id="thresholdValue">65</span>
+          </div>
+        </div>
+      </div>
       <div class="panel" id="panelLayout"><div class="layout-grid" id="layoutGrid"></div></div>
       <div class="panel text-panel" id="panelText">
         <!-- Spotify inputs -->
@@ -944,6 +1023,12 @@
     let vbgAnimationId = null;
     let segmentationReady = false;
 
+    // For mask processing
+    let maskCanvas = null;
+    let maskCtx = null;
+    let edgeBlur = 8; // Edge feathering amount
+    let maskThreshold = 0.65; // Higher = stricter person detection (0.5-0.9)
+
     // Initialize MediaPipe Selfie Segmentation
     async function initSegmentation() {
       if (selfieSegmentation) return;
@@ -965,18 +1050,78 @@
       const w = vbgCanvas.width;
       const h = vbgCanvas.height;
 
+      // Create mask canvas if needed
+      if (!maskCanvas) {
+        maskCanvas = document.createElement('canvas');
+        maskCtx = maskCanvas.getContext('2d', { willReadFrequently: true });
+      }
+      maskCanvas.width = w;
+      maskCanvas.height = h;
+
+      // Draw and process the segmentation mask
+      maskCtx.drawImage(results.segmentationMask, 0, 0, w, h);
+
+      // Apply threshold to clean up the mask
+      const imageData = maskCtx.getImageData(0, 0, w, h);
+      const data = imageData.data;
+      const threshold = maskThreshold * 255;
+
+      for (let i = 0; i < data.length; i += 4) {
+        // Use red channel as mask value
+        const maskValue = data[i];
+        if (maskValue > threshold) {
+          data[i] = data[i + 1] = data[i + 2] = 255;
+          data[i + 3] = 255;
+        } else if (maskValue > threshold * 0.5) {
+          // Soft edge transition
+          const alpha = (maskValue - threshold * 0.5) / (threshold * 0.5);
+          data[i] = data[i + 1] = data[i + 2] = 255;
+          data[i + 3] = Math.round(alpha * 255);
+        } else {
+          data[i] = data[i + 1] = data[i + 2] = 0;
+          data[i + 3] = 0;
+        }
+      }
+      maskCtx.putImageData(imageData, 0, 0);
+
+      // Apply blur for edge feathering
       vbgCtx.save();
       vbgCtx.clearRect(0, 0, w, h);
 
-      // Draw background first
+      // Draw background
       drawVirtualBackground(vbgCtx, w, h);
 
-      // Use segmentation mask to composite person
-      vbgCtx.globalCompositeOperation = 'destination-out';
-      vbgCtx.drawImage(results.segmentationMask, 0, 0, w, h);
+      // Apply feathered mask
+      vbgCtx.filter = `blur(${edgeBlur}px)`;
+      vbgCtx.globalCompositeOperation = 'destination-in';
+      vbgCtx.drawImage(maskCanvas, 0, 0, w, h);
+      vbgCtx.filter = 'none';
 
+      // Composite background behind
       vbgCtx.globalCompositeOperation = 'destination-over';
-      vbgCtx.drawImage(results.image, 0, 0, w, h);
+      drawVirtualBackground(vbgCtx, w, h);
+
+      // Draw the original person on top
+      vbgCtx.globalCompositeOperation = 'source-over';
+
+      // Create a temp canvas with person only
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = w;
+      tempCanvas.height = h;
+      const tempCtx = tempCanvas.getContext('2d');
+
+      // Draw person
+      tempCtx.drawImage(results.image, 0, 0, w, h);
+
+      // Apply processed mask
+      tempCtx.globalCompositeOperation = 'destination-in';
+      tempCtx.filter = `blur(${edgeBlur / 2}px)`;
+      tempCtx.drawImage(maskCanvas, 0, 0, w, h);
+
+      // Draw person with background
+      vbgCtx.clearRect(0, 0, w, h);
+      drawVirtualBackground(vbgCtx, w, h);
+      vbgCtx.drawImage(tempCanvas, 0, 0);
 
       vbgCtx.restore();
     }
@@ -1055,6 +1200,77 @@
       }
     }
 
+    // ==================== PANEL TOGGLE ====================
+    let panelCollapsed = false;
+
+    function togglePanel() {
+      const panel = document.getElementById('bottomPanel');
+      panelCollapsed = !panelCollapsed;
+      panel.classList.toggle('collapsed', panelCollapsed);
+    }
+
+    // Auto-collapse panel when tapping on preview area
+    document.addEventListener('click', (e) => {
+      const previewArea = document.querySelector('.preview-area');
+      const bottomPanel = document.getElementById('bottomPanel');
+      if (previewArea && previewArea.contains(e.target) && !e.target.classList.contains('editable-text')) {
+        if (!panelCollapsed) {
+          panelCollapsed = true;
+          bottomPanel.classList.add('collapsed');
+        }
+      }
+    });
+
+    // ==================== TAP-TO-EDIT ====================
+    function setupEditableText() {
+      // Setup event delegation for editable text
+      document.getElementById('photoFrame').addEventListener('click', (e) => {
+        const editable = e.target.closest('.editable-text');
+        if (editable) {
+          e.stopPropagation();
+          editable.focus();
+          // Select all text
+          const range = document.createRange();
+          range.selectNodeContents(editable);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      });
+
+      document.getElementById('photoFrame').addEventListener('blur', (e) => {
+        if (e.target.classList.contains('editable-text')) {
+          const field = e.target.dataset.field;
+          const value = e.target.textContent.trim();
+          syncEditableToInput(field, value);
+        }
+      }, true);
+
+      document.getElementById('photoFrame').addEventListener('keydown', (e) => {
+        if (e.target.classList.contains('editable-text') && e.key === 'Enter') {
+          e.preventDefault();
+          e.target.blur();
+        }
+      });
+    }
+
+    function syncEditableToInput(field, value) {
+      const inputMap = {
+        'footer': 'footerInput',
+        'header': 'headerInput',
+        'headline': 'newspaperHeadline',
+        'newsDate': 'newspaperDate',
+        'newsLocation': 'newspaperLocation',
+        'newsEdition': 'newspaperEdition',
+        'songTitle': 'spotifySong',
+        'songArtist': 'spotifyArtist'
+      };
+      const inputId = inputMap[field];
+      if (inputId) {
+        document.getElementById(inputId).value = value;
+      }
+    }
+
     function init() {
       renderFilters();
       renderThemes();
@@ -1064,6 +1280,7 @@
       toggleTextInputs();
       updatePreview();
       initSegmentation();
+      setupEditableText();
     }
 
     function renderFilters() {
@@ -1099,11 +1316,33 @@
     function selectBackground(id) {
       virtualBg = virtualBackgrounds.find(b => b.id === id);
       renderBackgrounds();
+      // Show/hide settings
+      const vbgSettings = document.getElementById('vbgSettings');
+      if (vbgSettings) {
+        vbgSettings.style.display = virtualBg.type !== 'none' ? 'block' : 'none';
+      }
       // Restart video processing with new background
       if (cameraOn) {
+        stopVirtualBackground();
         updatePreview();
       }
     }
+
+    // Update slider display values
+    document.addEventListener('DOMContentLoaded', () => {
+      const blurSlider = document.getElementById('edgeBlurSlider');
+      const thresholdSlider = document.getElementById('thresholdSlider');
+      if (blurSlider) {
+        blurSlider.addEventListener('input', (e) => {
+          document.getElementById('blurValue').textContent = e.target.value;
+        });
+      }
+      if (thresholdSlider) {
+        thresholdSlider.addEventListener('input', (e) => {
+          document.getElementById('thresholdValue').textContent = e.target.value;
+        });
+      }
+    });
 
     function renderLayouts() {
       const icons = {
@@ -1236,7 +1475,7 @@
       }
 
       let gridHtml = `<div class="photo-grid">${slotsHtml}</div>`;
-      let footerHtml = footer ? `<div class="frame-footer">${footer}</div>` : '';
+      let footerHtml = `<div class="frame-footer"><span class="editable-text" contenteditable="true" data-field="footer" data-placeholder="Footer">${footer}</span></div>`;
 
       // Theme-specific elements
       let extraHtml = '';
@@ -1249,7 +1488,7 @@
         extraHtml = `<span class="xmark-icon">✕</span>`;
         if (dateVal) extraHtml += `<span class="date-stamp">${dateNumeric}</span>`;
       } else if (theme.id === 'classicbw') {
-        if (header) extraHtml += `<span class="text-overlay">${header}</span>`;
+        extraHtml += `<span class="text-overlay"><span class="editable-text" contenteditable="true" data-field="header" data-placeholder="Title">${header}</span></span>`;
         if (dateVal) extraHtml += `<span class="date-stamp">${dateFormatted}</span>`;
       } else if (theme.id === 'yellow' || theme.id === 'red' || theme.id === 'blue') {
         if (dateVal) extraHtml += `<span class="date-stamp">${dateFormatted}</span>`;
@@ -1259,8 +1498,8 @@
             <div class="music-header">
               <div class="album-art">🎵</div>
               <div class="song-info">
-                <div class="song-title">${songName}</div>
-                <div class="song-artist">${artistName}</div>
+                <div class="song-title"><span class="editable-text" contenteditable="true" data-field="songTitle" data-placeholder="Song">${songName}</span></div>
+                <div class="song-artist"><span class="editable-text" contenteditable="true" data-field="songArtist" data-placeholder="Artist">${artistName}</span></div>
               </div>
               <span class="song-heart">♡</span>
             </div>
@@ -1283,13 +1522,13 @@
           <div class="newspaper-header">
             <div class="newspaper-title">The Birthday Times</div>
             <div class="newspaper-meta">
-              <span>${newsDate}</span>
-              <span>${newsLocation}</span>
+              <span class="editable-text" contenteditable="true" data-field="newsDate" data-placeholder="Date">${newsDate}</span>
+              <span class="editable-text" contenteditable="true" data-field="newsLocation" data-placeholder="Location">${newsLocation}</span>
             </div>
-            <div class="newspaper-headline">${newsHeadline}</div>
+            <div class="newspaper-headline"><span class="editable-text" contenteditable="true" data-field="headline" data-placeholder="Headline">${newsHeadline}</span></div>
           </div>
           ${gridHtml}
-          <div class="frame-footer">${newsEdition}</div>
+          <div class="frame-footer"><span class="editable-text" contenteditable="true" data-field="newsEdition" data-placeholder="Edition">${newsEdition}</span></div>
         `;
       } else {
         frame.innerHTML = `${gridHtml}${footerHtml}${extraHtml}`;
