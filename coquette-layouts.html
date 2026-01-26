@@ -67,9 +67,9 @@
       transition: transform 0.3s ease;
       transform-origin: center center;
     }
-    /* Scale up frame when panel is collapsed */
+    /* Scale up frame when panel is collapsed (+10% more) */
     .app:has(.bottom-panel.collapsed) .photo-frame {
-      transform: scale(1.15);
+      transform: scale(1.1);
     }
     .photo-grid { display: grid; gap: 4px; }
     .photo-slot {
@@ -143,8 +143,8 @@
     }
 
     /* ==================== LAYOUTS ==================== */
-    /* Responsive frame sizing - larger by default */
-    .photo-frame { --frame-w: min(85vw, 340px); }
+    /* Responsive frame sizing - larger by default (+20%) */
+    .photo-frame { --frame-w: min(95vw, 420px); }
 
     /* Strip 2x6 */
     .layout-strip3 { width: calc(var(--frame-w) * 0.5); }
