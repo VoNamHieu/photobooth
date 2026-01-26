@@ -8,6 +8,7 @@
   <title>Coquette Studio</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=Satisfy&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     :root {
@@ -48,58 +49,16 @@
       position: relative;
     }
 
-    /* Background patterns */
-    .preview-area.bg-none { background: #050505; }
-    .preview-area.bg-yellow { background: #f5d800; }
-    .preview-area.bg-pink { background: #ffb6c1; }
-    .preview-area.bg-blue { background: #87ceeb; }
-    .preview-area.bg-green { background: #90ee90; }
-    .preview-area.bg-purple { background: #dda0dd; }
-    .preview-area.bg-orange { background: #ffa500; }
-    .preview-area.bg-white { background: #f5f5f5; }
-    .preview-area.bg-black { background: #1a1a1a; }
-
-    /* Text pattern backgrounds */
-    .preview-area.bg-pattern-times {
-      background-color: #f5f5f0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='10' y='40' font-family='Arial Black, sans-serif' font-size='50' font-weight='900' fill='%23e5e5e0' transform='rotate(-15 100 50)'%3ETIMES%3C/text%3E%3Ctext x='10' y='90' font-family='Arial Black, sans-serif' font-size='50' font-weight='900' fill='%23e5e5e0' transform='rotate(-15 100 50)'%3ETIMES%3C/text%3E%3C/svg%3E");
-      background-size: 180px 90px;
+    /* Virtual background canvas */
+    .vbg-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
     }
-    .preview-area.bg-pattern-love {
-      background-color: #fff0f5;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='10' y='40' font-family='Arial Black, sans-serif' font-size='50' font-weight='900' fill='%23ffe4e8' transform='rotate(-15 100 50)'%3ELOVE%3C/text%3E%3Ctext x='10' y='90' font-family='Arial Black, sans-serif' font-size='50' font-weight='900' fill='%23ffe4e8' transform='rotate(-15 100 50)'%3ELOVE%3C/text%3E%3C/svg%3E");
-      background-size: 180px 90px;
-    }
-    .preview-area.bg-pattern-xoxo {
-      background-color: #fff5f5;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='10' y='40' font-family='Arial Black, sans-serif' font-size='50' font-weight='900' fill='%23ffe0e0' transform='rotate(-15 100 50)'%3EXOXO%3C/text%3E%3Ctext x='10' y='90' font-family='Arial Black, sans-serif' font-size='50' font-weight='900' fill='%23ffe0e0' transform='rotate(-15 100 50)'%3EXOXO%3C/text%3E%3C/svg%3E");
-      background-size: 180px 90px;
-    }
-    .preview-area.bg-pattern-smile {
-      background-color: #fffacd;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='10' y='40' font-family='Arial Black, sans-serif' font-size='45' font-weight='900' fill='%23f0e68c' transform='rotate(-15 100 50)'%3ESMILE%3C/text%3E%3Ctext x='10' y='90' font-family='Arial Black, sans-serif' font-size='45' font-weight='900' fill='%23f0e68c' transform='rotate(-15 100 50)'%3ESMILE%3C/text%3E%3C/svg%3E");
-      background-size: 180px 90px;
-    }
-    .preview-area.bg-pattern-happy {
-      background-color: #e6ffe6;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='10' y='40' font-family='Arial Black, sans-serif' font-size='45' font-weight='900' fill='%23c8f7c8' transform='rotate(-15 100 50)'%3EHAPPY%3C/text%3E%3Ctext x='10' y='90' font-family='Arial Black, sans-serif' font-size='45' font-weight='900' fill='%23c8f7c8' transform='rotate(-15 100 50)'%3EHAPPY%3C/text%3E%3C/svg%3E");
-      background-size: 180px 90px;
-    }
-    .preview-area.bg-pattern-party {
-      background-color: #f0e6ff;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='100'%3E%3Ctext x='10' y='40' font-family='Arial Black, sans-serif' font-size='45' font-weight='900' fill='%23dcc8ff' transform='rotate(-15 100 50)'%3EPARTY%3C/text%3E%3Ctext x='10' y='90' font-family='Arial Black, sans-serif' font-size='45' font-weight='900' fill='%23dcc8ff' transform='rotate(-15 100 50)'%3EPARTY%3C/text%3E%3C/svg%3E");
-      background-size: 180px 90px;
-    }
-    .preview-area.bg-pattern-star {
-      background-color: #fffaf0;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ctext x='15' y='40' font-size='30' fill='%23ffe4c4'%3E★%3C/text%3E%3C/svg%3E");
-      background-size: 60px 60px;
-    }
-    .preview-area.bg-pattern-heart {
-      background-color: #fff0f5;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ctext x='15' y='40' font-size='30' fill='%23ffb6c1'%3E♥%3C/text%3E%3C/svg%3E");
-      background-size: 60px 60px;
-    }
+    .photo-slot video.has-vbg { opacity: 0; }
+    .photo-slot .vbg-canvas { border-radius: 3px; }
 
     /* Frame */
     .photo-frame {
@@ -575,6 +534,15 @@
       object-fit: cover;
       transform: scaleX(-1);
     }
+    .fullscreen-video-container video.has-vbg { opacity: 0; }
+    .fullscreen-video-container .vbg-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      border-radius: 16px;
+    }
 
     .fullscreen-countdown {
       position: absolute;
@@ -868,6 +836,7 @@
     <div class="fullscreen-camera" id="fullscreenCamera">
       <div class="fullscreen-video-container">
         <video id="fullscreenVideo" autoplay playsinline muted></video>
+        <canvas id="fullscreenVbgCanvas" class="vbg-canvas" style="display:none;"></canvas>
         <div class="fullscreen-countdown" id="fullscreenCountdown"></div>
         <div class="fullscreen-flash" id="fullscreenFlash"></div>
       </div>
@@ -933,27 +902,25 @@
       { id: 'soft', name: 'Soft', css: 'brightness(105%) contrast(90%) saturate(90%)' },
     ];
 
-    const backgrounds = [
-      { id: 'none', name: 'None', color: '#050505', pattern: null },
-      { id: 'yellow', name: 'Yellow', color: '#f5d800', pattern: null },
-      { id: 'pink', name: 'Pink', color: '#ffb6c1', pattern: null },
-      { id: 'blue', name: 'Blue', color: '#87ceeb', pattern: null },
-      { id: 'green', name: 'Green', color: '#90ee90', pattern: null },
-      { id: 'purple', name: 'Purple', color: '#dda0dd', pattern: null },
-      { id: 'orange', name: 'Orange', color: '#ffa500', pattern: null },
-      { id: 'white', name: 'White', color: '#f5f5f5', pattern: null },
-      { id: 'pattern-times', name: 'TIMES', color: '#f5f5f0', pattern: 'TIMES' },
-      { id: 'pattern-love', name: 'LOVE', color: '#fff0f5', pattern: 'LOVE' },
-      { id: 'pattern-xoxo', name: 'XOXO', color: '#fff5f5', pattern: 'XOXO' },
-      { id: 'pattern-smile', name: 'SMILE', color: '#fffacd', pattern: 'SMILE' },
-      { id: 'pattern-happy', name: 'HAPPY', color: '#e6ffe6', pattern: 'HAPPY' },
-      { id: 'pattern-party', name: 'PARTY', color: '#f0e6ff', pattern: 'PARTY' },
-      { id: 'pattern-star', name: 'Stars', color: '#fffaf0', pattern: '★' },
-      { id: 'pattern-heart', name: 'Hearts', color: '#fff0f5', pattern: '♥' },
+    // Virtual backgrounds (behind the person)
+    const virtualBackgrounds = [
+      { id: 'none', name: 'None', type: 'none', color: null },
+      { id: 'curtain-red', name: 'Red', type: 'curtain', color: '#8B0000' },
+      { id: 'curtain-blue', name: 'Blue', type: 'curtain', color: '#1a3a5c' },
+      { id: 'curtain-green', name: 'Green', type: 'curtain', color: '#2d5a2d' },
+      { id: 'curtain-purple', name: 'Purple', type: 'curtain', color: '#4a2a5a' },
+      { id: 'curtain-gold', name: 'Gold', type: 'curtain', color: '#8B7500' },
+      { id: 'solid-white', name: 'White', type: 'solid', color: '#ffffff' },
+      { id: 'solid-pink', name: 'Pink', type: 'solid', color: '#ffb6c1' },
+      { id: 'solid-yellow', name: 'Yellow', type: 'solid', color: '#f5d800' },
+      { id: 'solid-cyan', name: 'Cyan', type: 'solid', color: '#00CED1' },
+      { id: 'gradient-sunset', name: 'Sunset', type: 'gradient', colors: ['#ff7e5f', '#feb47b'] },
+      { id: 'gradient-ocean', name: 'Ocean', type: 'gradient', colors: ['#2193b0', '#6dd5ed'] },
+      { id: 'gradient-purple', name: 'Violet', type: 'gradient', colors: ['#834d9b', '#d04ed6'] },
     ];
 
     // Default to white theme (index 0)
-    let photos = [], theme = themes[0], layout = layouts[1], filter = filters[0], background = backgrounds[0];
+    let photos = [], theme = themes[0], layout = layouts[1], filter = filters[0], virtualBg = virtualBackgrounds[0];
     let currentTab = 'filter', stream = null, cameraOn = false, isFullscreen = false;
     let customFrameColor = null;
 
@@ -969,7 +936,135 @@
     const filterIndicatorEl = document.getElementById('filterIndicator');
     const miniFramePreview = document.getElementById('miniFramePreview');
 
-    function init() { renderFilters(); renderThemes(); renderBackgrounds(); renderLayouts(); updateColorPickerVisibility(); toggleTextInputs(); updatePreview(); }
+    // Virtual background segmentation
+    let selfieSegmentation = null;
+    let vbgCanvas = null;
+    let vbgCtx = null;
+    let vbgVideo = null;
+    let vbgAnimationId = null;
+    let segmentationReady = false;
+
+    // Initialize MediaPipe Selfie Segmentation
+    async function initSegmentation() {
+      if (selfieSegmentation) return;
+      try {
+        selfieSegmentation = new SelfieSegmentation({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+        });
+        selfieSegmentation.setOptions({ modelSelection: 1, selfieMode: true });
+        selfieSegmentation.onResults(onSegmentationResults);
+        segmentationReady = true;
+        console.log('Segmentation ready');
+      } catch (e) {
+        console.error('Segmentation init failed:', e);
+      }
+    }
+
+    function onSegmentationResults(results) {
+      if (!vbgCtx || !vbgCanvas) return;
+      const w = vbgCanvas.width;
+      const h = vbgCanvas.height;
+
+      vbgCtx.save();
+      vbgCtx.clearRect(0, 0, w, h);
+
+      // Draw background first
+      drawVirtualBackground(vbgCtx, w, h);
+
+      // Use segmentation mask to composite person
+      vbgCtx.globalCompositeOperation = 'destination-out';
+      vbgCtx.drawImage(results.segmentationMask, 0, 0, w, h);
+
+      vbgCtx.globalCompositeOperation = 'destination-over';
+      vbgCtx.drawImage(results.image, 0, 0, w, h);
+
+      vbgCtx.restore();
+    }
+
+    function drawVirtualBackground(ctx, w, h) {
+      if (virtualBg.type === 'none') return;
+
+      if (virtualBg.type === 'solid') {
+        ctx.fillStyle = virtualBg.color;
+        ctx.fillRect(0, 0, w, h);
+      } else if (virtualBg.type === 'curtain') {
+        // Draw curtain-like background with folds
+        const baseColor = virtualBg.color;
+        ctx.fillStyle = baseColor;
+        ctx.fillRect(0, 0, w, h);
+
+        // Add curtain fold effect
+        const foldWidth = w / 12;
+        for (let i = 0; i < 12; i++) {
+          const x = i * foldWidth;
+          const gradient = ctx.createLinearGradient(x, 0, x + foldWidth, 0);
+          const lightColor = adjustBrightness(baseColor, 20);
+          const darkColor = adjustBrightness(baseColor, -30);
+          gradient.addColorStop(0, darkColor);
+          gradient.addColorStop(0.3, lightColor);
+          gradient.addColorStop(0.7, lightColor);
+          gradient.addColorStop(1, darkColor);
+          ctx.fillStyle = gradient;
+          ctx.fillRect(x, 0, foldWidth, h);
+        }
+      } else if (virtualBg.type === 'gradient') {
+        const gradient = ctx.createLinearGradient(0, 0, 0, h);
+        gradient.addColorStop(0, virtualBg.colors[0]);
+        gradient.addColorStop(1, virtualBg.colors[1]);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, w, h);
+      }
+    }
+
+    function adjustBrightness(hex, percent) {
+      const num = parseInt(hex.replace('#', ''), 16);
+      const amt = Math.round(2.55 * percent);
+      const R = Math.max(0, Math.min(255, (num >> 16) + amt));
+      const G = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amt));
+      const B = Math.max(0, Math.min(255, (num & 0x0000FF) + amt));
+      return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+    }
+
+    async function processVideoFrame() {
+      if (!cameraOn || !selfieSegmentation || !vbgVideo || virtualBg.type === 'none') {
+        vbgAnimationId = requestAnimationFrame(processVideoFrame);
+        return;
+      }
+      try {
+        await selfieSegmentation.send({ image: vbgVideo });
+      } catch (e) {}
+      vbgAnimationId = requestAnimationFrame(processVideoFrame);
+    }
+
+    function startVirtualBackground(video, canvasEl) {
+      vbgVideo = video;
+      vbgCanvas = canvasEl;
+      vbgCtx = canvasEl.getContext('2d');
+
+      if (virtualBg.type !== 'none' && segmentationReady) {
+        vbgCanvas.width = video.videoWidth || 640;
+        vbgCanvas.height = video.videoHeight || 480;
+        processVideoFrame();
+      }
+    }
+
+    function stopVirtualBackground() {
+      if (vbgAnimationId) {
+        cancelAnimationFrame(vbgAnimationId);
+        vbgAnimationId = null;
+      }
+    }
+
+    function init() {
+      renderFilters();
+      renderThemes();
+      renderBackgrounds();
+      renderLayouts();
+      updateColorPickerVisibility();
+      toggleTextInputs();
+      updatePreview();
+      initSegmentation();
+    }
 
     function renderFilters() {
       document.getElementById('filterScroll').innerHTML = filters.map(f =>
@@ -986,29 +1081,28 @@
     }
 
     function renderBackgrounds() {
-      document.getElementById('bgScroll').innerHTML = backgrounds.map(b => {
-        let previewContent = '';
-        if (b.pattern) {
-          previewContent = `<div class="bg-preview-pattern">${b.pattern}</div>`;
+      document.getElementById('bgScroll').innerHTML = virtualBackgrounds.map(b => {
+        let bgStyle = '';
+        if (b.type === 'none') {
+          bgStyle = 'background: linear-gradient(45deg, #333 25%, #444 25%, #444 50%, #333 50%, #333 75%, #444 75%); background-size: 8px 8px;';
+        } else if (b.type === 'solid' || b.type === 'curtain') {
+          bgStyle = `background: ${b.color};`;
+        } else if (b.type === 'gradient') {
+          bgStyle = `background: linear-gradient(180deg, ${b.colors[0]}, ${b.colors[1]});`;
         }
-        return `<div class="bg-item ${b.id === background.id ? 'active' : ''}" onclick="selectBackground('${b.id}')">
-          <div class="bg-preview" style="background:${b.color}">${previewContent}</div><span>${b.name}</span>
+        return `<div class="bg-item ${b.id === virtualBg.id ? 'active' : ''}" onclick="selectBackground('${b.id}')">
+          <div class="bg-preview" style="${bgStyle}"></div><span>${b.name}</span>
         </div>`;
       }).join('');
     }
 
     function selectBackground(id) {
-      background = backgrounds.find(b => b.id === id);
+      virtualBg = virtualBackgrounds.find(b => b.id === id);
       renderBackgrounds();
-      updatePreviewBackground();
-    }
-
-    function updatePreviewBackground() {
-      const previewArea = document.querySelector('.preview-area');
-      // Remove all bg classes
-      previewArea.className = previewArea.className.replace(/\bbg-\S+/g, '').trim();
-      previewArea.classList.add('preview-area');
-      previewArea.classList.add('bg-' + background.id);
+      // Restart video processing with new background
+      if (cameraOn) {
+        updatePreview();
+      }
     }
 
     function renderLayouts() {
@@ -1109,7 +1203,6 @@
     function updatePreview() {
       const frame = document.getElementById('photoFrame');
       frame.className = `photo-frame theme-${theme.id} layout-${layout.id}`;
-      updatePreviewBackground();
       // Apply custom frame color if set and theme supports it
       if (customFrameColor && customColorThemes.includes(theme.id)) {
         frame.style.background = customFrameColor;
@@ -1128,11 +1221,14 @@
 
       const effectiveSlots = getEffectiveSlots();
       let slotsHtml = '', liveAdded = false;
+      const useVbg = virtualBg.type !== 'none';
       for (let i = 0; i < effectiveSlots; i++) {
         if (photos[i]) {
           slotsHtml += `<div class="photo-slot"><img src="${photos[i]}" style="filter:${filter.css}"><button class="remove-btn" onclick="removePhoto(${i})">✕</button></div>`;
         } else if (cameraOn && !liveAdded) {
-          slotsHtml += `<div class="photo-slot" id="liveSlot"><video id="liveVideo" autoplay playsinline muted style="filter:${filter.css}"></video><span class="live-badge">● LIVE</span><div class="countdown-overlay" id="countdown"></div><div class="flash-overlay" id="flash"></div></div>`;
+          const videoClass = useVbg ? 'has-vbg' : '';
+          const canvasHtml = useVbg ? `<canvas class="vbg-canvas" id="liveVbgCanvas" style="filter:${filter.css}"></canvas>` : '';
+          slotsHtml += `<div class="photo-slot" id="liveSlot"><video id="liveVideo" class="${videoClass}" autoplay playsinline muted style="filter:${filter.css}"></video>${canvasHtml}<span class="live-badge">● LIVE</span><div class="countdown-overlay" id="countdown"></div><div class="flash-overlay" id="flash"></div></div>`;
           liveAdded = true;
         } else {
           slotsHtml += `<div class="photo-slot"><span class="placeholder">${i + 1}</span></div>`;
@@ -1201,7 +1297,18 @@
 
       if (cameraOn && stream) {
         const v = document.getElementById('liveVideo');
-        if (v && v.srcObject !== stream) v.srcObject = stream;
+        if (v && v.srcObject !== stream) {
+          v.srcObject = stream;
+          // Start virtual background if enabled
+          if (virtualBg.type !== 'none') {
+            v.onloadedmetadata = () => {
+              const vbgCanvas = document.getElementById('liveVbgCanvas');
+              if (vbgCanvas && segmentationReady) {
+                startVirtualBackground(v, vbgCanvas);
+              }
+            };
+          }
+        }
       }
       document.getElementById('captureBtn').disabled = !cameraOn || photos.length >= getEffectiveSlots();
       document.getElementById('captureBtn').classList.toggle('recording', cameraOn);
@@ -1222,6 +1329,7 @@
     }
     function stopCamera() {
       if (isFullscreen) exitFullscreenCamera();
+      stopVirtualBackground();
       if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
       cameraOn = false;
       document.getElementById('camIcon').textContent = '📷';
@@ -1241,6 +1349,24 @@
       fullscreenVideo.srcObject = stream;
       fullscreenVideo.style.filter = filter.css;
       filterIndicatorEl.textContent = filter.name;
+
+      // Setup virtual background for fullscreen
+      const fsVbgCanvas = document.getElementById('fullscreenVbgCanvas');
+      if (virtualBg.type !== 'none' && segmentationReady) {
+        fullscreenVideo.classList.add('has-vbg');
+        fsVbgCanvas.style.display = 'block';
+        fsVbgCanvas.style.filter = filter.css;
+        fullscreenVideo.onloadedmetadata = () => {
+          startVirtualBackground(fullscreenVideo, fsVbgCanvas);
+        };
+        if (fullscreenVideo.readyState >= 2) {
+          startVirtualBackground(fullscreenVideo, fsVbgCanvas);
+        }
+      } else {
+        fullscreenVideo.classList.remove('has-vbg');
+        fsVbgCanvas.style.display = 'none';
+      }
+
       updatePhotoCount();
       updateMiniFramePreview();
       fullscreenCaptureBtn.disabled = false;
@@ -1250,6 +1376,7 @@
       isFullscreen = false;
       fullscreenCamera.classList.remove('active');
       fullscreenCountdown.classList.remove('active');
+      stopVirtualBackground();
       updatePreview();
     }
 
@@ -1366,13 +1493,28 @@
     }
 
     function doCapture() {
+      const fsVbgCanvas = document.getElementById('fullscreenVbgCanvas');
+      const useVbg = virtualBg.type !== 'none' && fsVbgCanvas && fsVbgCanvas.width > 0;
+
       canvas.width = fullscreenVideo.videoWidth;
       canvas.height = fullscreenVideo.videoHeight;
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-      ctx.filter = filter.css;
-      ctx.drawImage(fullscreenVideo, 0, 0);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+      if (useVbg) {
+        // Capture from virtual background canvas (already has background applied)
+        ctx.save();
+        ctx.filter = filter.css;
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(fsVbgCanvas, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+      } else {
+        // Capture from video directly
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.filter = filter.css;
+        ctx.drawImage(fullscreenVideo, 0, 0);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+      }
 
       // Flash effect
       fullscreenFlash.classList.add('active');
