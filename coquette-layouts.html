@@ -780,7 +780,21 @@
           </div>
         </div>
       </div>
-      <div class="panel" id="panelBg"><div class="panel-scroll" id="bgScroll"></div></div>
+      <div class="panel" id="panelBg">
+        <div class="panel-scroll" id="bgScroll"></div>
+        <div class="vbg-settings" id="vbgSettings" style="display:none; padding: 8px 16px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+            <span style="font-size:11px; color:var(--text-2); min-width:60px;">Smooth</span>
+            <input type="range" id="edgeBlurSlider" min="0" max="20" value="8" style="flex:1; accent-color:var(--accent);" oninput="edgeBlur=parseInt(this.value)">
+            <span style="font-size:10px; color:var(--text-3); width:24px;" id="blurValue">8</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:11px; color:var(--text-2); min-width:60px;">Precision</span>
+            <input type="range" id="thresholdSlider" min="40" max="90" value="65" style="flex:1; accent-color:var(--accent);" oninput="maskThreshold=parseInt(this.value)/100">
+            <span style="font-size:10px; color:var(--text-3); width:24px;" id="thresholdValue">65</span>
+          </div>
+        </div>
+      </div>
       <div class="panel" id="panelLayout"><div class="layout-grid" id="layoutGrid"></div></div>
       <div class="panel text-panel" id="panelText">
         <!-- Spotify inputs -->
@@ -944,6 +958,12 @@
     let vbgAnimationId = null;
     let segmentationReady = false;
 
+    // For mask processing
+    let maskCanvas = null;
+    let maskCtx = null;
+    let edgeBlur = 8; // Edge feathering amount
+    let maskThreshold = 0.65; // Higher = stricter person detection (0.5-0.9)
+
     // Initialize MediaPipe Selfie Segmentation
     async function initSegmentation() {
       if (selfieSegmentation) return;
@@ -965,18 +985,78 @@
       const w = vbgCanvas.width;
       const h = vbgCanvas.height;
 
+      // Create mask canvas if needed
+      if (!maskCanvas) {
+        maskCanvas = document.createElement('canvas');
+        maskCtx = maskCanvas.getContext('2d', { willReadFrequently: true });
+      }
+      maskCanvas.width = w;
+      maskCanvas.height = h;
+
+      // Draw and process the segmentation mask
+      maskCtx.drawImage(results.segmentationMask, 0, 0, w, h);
+
+      // Apply threshold to clean up the mask
+      const imageData = maskCtx.getImageData(0, 0, w, h);
+      const data = imageData.data;
+      const threshold = maskThreshold * 255;
+
+      for (let i = 0; i < data.length; i += 4) {
+        // Use red channel as mask value
+        const maskValue = data[i];
+        if (maskValue > threshold) {
+          data[i] = data[i + 1] = data[i + 2] = 255;
+          data[i + 3] = 255;
+        } else if (maskValue > threshold * 0.5) {
+          // Soft edge transition
+          const alpha = (maskValue - threshold * 0.5) / (threshold * 0.5);
+          data[i] = data[i + 1] = data[i + 2] = 255;
+          data[i + 3] = Math.round(alpha * 255);
+        } else {
+          data[i] = data[i + 1] = data[i + 2] = 0;
+          data[i + 3] = 0;
+        }
+      }
+      maskCtx.putImageData(imageData, 0, 0);
+
+      // Apply blur for edge feathering
       vbgCtx.save();
       vbgCtx.clearRect(0, 0, w, h);
 
-      // Draw background first
+      // Draw background
       drawVirtualBackground(vbgCtx, w, h);
 
-      // Use segmentation mask to composite person
-      vbgCtx.globalCompositeOperation = 'destination-out';
-      vbgCtx.drawImage(results.segmentationMask, 0, 0, w, h);
+      // Apply feathered mask
+      vbgCtx.filter = `blur(${edgeBlur}px)`;
+      vbgCtx.globalCompositeOperation = 'destination-in';
+      vbgCtx.drawImage(maskCanvas, 0, 0, w, h);
+      vbgCtx.filter = 'none';
 
+      // Composite background behind
       vbgCtx.globalCompositeOperation = 'destination-over';
-      vbgCtx.drawImage(results.image, 0, 0, w, h);
+      drawVirtualBackground(vbgCtx, w, h);
+
+      // Draw the original person on top
+      vbgCtx.globalCompositeOperation = 'source-over';
+
+      // Create a temp canvas with person only
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = w;
+      tempCanvas.height = h;
+      const tempCtx = tempCanvas.getContext('2d');
+
+      // Draw person
+      tempCtx.drawImage(results.image, 0, 0, w, h);
+
+      // Apply processed mask
+      tempCtx.globalCompositeOperation = 'destination-in';
+      tempCtx.filter = `blur(${edgeBlur / 2}px)`;
+      tempCtx.drawImage(maskCanvas, 0, 0, w, h);
+
+      // Draw person with background
+      vbgCtx.clearRect(0, 0, w, h);
+      drawVirtualBackground(vbgCtx, w, h);
+      vbgCtx.drawImage(tempCanvas, 0, 0);
 
       vbgCtx.restore();
     }
@@ -1099,11 +1179,33 @@
     function selectBackground(id) {
       virtualBg = virtualBackgrounds.find(b => b.id === id);
       renderBackgrounds();
+      // Show/hide settings
+      const vbgSettings = document.getElementById('vbgSettings');
+      if (vbgSettings) {
+        vbgSettings.style.display = virtualBg.type !== 'none' ? 'block' : 'none';
+      }
       // Restart video processing with new background
       if (cameraOn) {
+        stopVirtualBackground();
         updatePreview();
       }
     }
+
+    // Update slider display values
+    document.addEventListener('DOMContentLoaded', () => {
+      const blurSlider = document.getElementById('edgeBlurSlider');
+      const thresholdSlider = document.getElementById('thresholdSlider');
+      if (blurSlider) {
+        blurSlider.addEventListener('input', (e) => {
+          document.getElementById('blurValue').textContent = e.target.value;
+        });
+      }
+      if (thresholdSlider) {
+        thresholdSlider.addEventListener('input', (e) => {
+          document.getElementById('thresholdValue').textContent = e.target.value;
+        });
+      }
+    });
 
     function renderLayouts() {
       const icons = {
