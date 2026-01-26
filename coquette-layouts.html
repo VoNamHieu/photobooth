@@ -44,13 +44,13 @@
     /* Preview */
     .preview-area {
       flex: 1; display: flex; align-items: center; justify-content: center;
-      padding: 16px; padding-bottom: 80px; overflow: auto; background: #050505;
+      padding: 16px; padding-bottom: 220px; overflow: auto; background: #050505;
       min-height: 0; /* Allow shrinking */
       position: relative;
+      transition: padding-bottom 0.3s ease;
     }
-    .bottom-panel.collapsed ~ .preview-area,
-    .app:has(.bottom-panel.collapsed) .preview-area {
-      padding-bottom: 80px;
+    .preview-area.expanded {
+      padding-bottom: 90px;
     }
 
     /* Virtual background canvas */
@@ -68,6 +68,11 @@
     .photo-frame {
       box-shadow: 0 10px 50px rgba(0,0,0,0.8);
       position: relative; background: #111; padding: 10px; border-radius: 4px;
+      transition: transform 0.3s ease;
+      transform-origin: center center;
+    }
+    .preview-area.expanded .photo-frame {
+      transform: scale(1.2);
     }
     .photo-grid { display: grid; gap: 4px; }
     .photo-slot {
@@ -1205,8 +1210,10 @@
 
     function togglePanel() {
       const panel = document.getElementById('bottomPanel');
+      const previewArea = document.querySelector('.preview-area');
       panelCollapsed = !panelCollapsed;
       panel.classList.toggle('collapsed', panelCollapsed);
+      previewArea.classList.toggle('expanded', panelCollapsed);
     }
 
     // Auto-collapse panel when tapping on preview area
@@ -1217,6 +1224,7 @@
         if (!panelCollapsed) {
           panelCollapsed = true;
           bottomPanel.classList.add('collapsed');
+          previewArea.classList.add('expanded');
         }
       }
     });
