@@ -1068,7 +1068,14 @@
       document.getElementById('panel' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
     }
 
-    function selectFilter(id) { selectedFilter = filters.find(f => f.id === id); renderFilters(); updatePreview(); }
+    function selectFilter(id) {
+      selectedFilter = filters.find(f => f.id === id);
+      // Quick update: just toggle active class instead of rebuilding
+      document.querySelectorAll('#filterScroll .filter-item').forEach(el => {
+        el.classList.toggle('active', el.getAttribute('onclick').includes(`'${id}'`));
+      });
+      updatePreview();
+    }
     // Themes that require full DOM rebuild due to special structure
     const specialThemes = ['spotify', 'newspaper', 'film'];
 
@@ -1078,12 +1085,23 @@
       customFrameColor = null; // Reset custom color when changing theme
       updateColorPickerVisibility();
       toggleTextInputs();
-      renderThemes();
+      // Quick update: just toggle active class instead of rebuilding
+      document.querySelectorAll('#themeScroll .theme-item').forEach(el => {
+        el.classList.toggle('active', el.getAttribute('onclick').includes(`'${id}'`));
+      });
       // Force rebuild if switching to/from a special theme
       const needsRebuild = specialThemes.includes(oldTheme.id) || specialThemes.includes(theme.id);
       updatePreview(needsRebuild);
     }
-    function selectLayout(id) { layout = layouts.find(l => l.id === id); if (photos.length > layout.slots) photos = photos.slice(0, layout.slots); renderLayouts(); updatePreview(true); }
+    function selectLayout(id) {
+      layout = layouts.find(l => l.id === id);
+      if (photos.length > layout.slots) photos = photos.slice(0, layout.slots);
+      // Quick update: just toggle active class instead of rebuilding
+      document.querySelectorAll('#layoutGrid .layout-item').forEach(el => {
+        el.classList.toggle('active', el.getAttribute('onclick').includes(`'${id}'`));
+      });
+      updatePreview(true);
+    }
 
     function setFrameColor(color) {
       customFrameColor = color;
@@ -1139,54 +1157,41 @@
     }
 
     // Track last rendered state to avoid unnecessary DOM rebuilds
-    let lastRenderedState = null;
-
-    function getStateHash() {
-      return JSON.stringify({
-        theme: theme.id,
-        layout: layout.id,
-        filter: selectedFilter.id,
-        photosCount: photos.length,
-        cameraOn: cameraOn,
-        customFrameColor: customFrameColor
-      });
-    }
+    let lastLayoutId = null;
+    let lastPhotosCount = 0;
+    let lastCameraOn = false;
 
     function updatePreview(forceRebuild = false) {
       const frame = document.getElementById('photoFrame');
-      const currentState = getStateHash();
       const existingVideo = document.getElementById('liveVideo');
 
       // If camera is on and only filter/theme styling changed, do a quick update
-      if (!forceRebuild && cameraOn && existingVideo && lastRenderedState) {
-        const lastState = JSON.parse(lastRenderedState);
-        const currState = JSON.parse(currentState);
+      if (!forceRebuild && cameraOn && existingVideo &&
+          lastLayoutId === layout.id &&
+          lastPhotosCount === photos.length &&
+          lastCameraOn === cameraOn) {
 
-        // Check if only theme or filter changed (not layout, photos, or camera state)
-        if (lastState.layout === currState.layout &&
-            lastState.photosCount === currState.photosCount &&
-            lastState.cameraOn === currState.cameraOn) {
-
-          // Quick update: just change classes and styles without rebuilding DOM
-          frame.className = `photo-frame theme-${theme.id} layout-${layout.id}`;
-          if (customFrameColor && customColorThemes.includes(theme.id)) {
-            frame.style.background = customFrameColor;
-          } else {
-            frame.style.background = '';
-          }
-
-          // Update filter on video and images
-          existingVideo.style.filter = selectedFilter.css;
-          frame.querySelectorAll('.photo-slot img').forEach(img => {
-            img.style.filter = selectedFilter.css;
-          });
-
-          lastRenderedState = currentState;
-          return;
+        // Quick update: just change classes and styles without rebuilding DOM
+        frame.className = `photo-frame theme-${theme.id} layout-${layout.id}`;
+        if (customFrameColor && customColorThemes.includes(theme.id)) {
+          frame.style.background = customFrameColor;
+        } else {
+          frame.style.background = '';
         }
+
+        // Update filter on video and images
+        existingVideo.style.filter = selectedFilter.css;
+        frame.querySelectorAll('.photo-slot img').forEach(img => {
+          img.style.filter = selectedFilter.css;
+        });
+
+        return;
       }
 
-      // Full rebuild needed
+      // Full rebuild needed - update tracking state
+      lastLayoutId = layout.id;
+      lastPhotosCount = photos.length;
+      lastCameraOn = cameraOn;
       frame.className = `photo-frame theme-${theme.id} layout-${layout.id}`;
       // Apply custom frame color if set and theme supports it
       if (customFrameColor && customColorThemes.includes(theme.id)) {
@@ -1285,8 +1290,6 @@
       }
       document.getElementById('captureBtn').disabled = !cameraOn || photos.length >= getEffectiveSlots();
       document.getElementById('captureBtn').classList.toggle('recording', cameraOn);
-
-      lastRenderedState = currentState;
     }
 
     function removePhoto(i) { photos.splice(i, 1); updatePreview(); }
