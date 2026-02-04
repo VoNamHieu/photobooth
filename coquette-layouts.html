@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -772,11 +772,11 @@
   <div class="app">
     <header class="header">
       <div class="header-left">
-        <button class="header-btn" onclick="resetPhotos()">↺</button>
-        <button class="header-btn camera-btn" id="cameraBtn" onclick="toggleCamera()"><span id="camIcon">📷</span></button>
+        <button class="header-btn" onclick="resetPhotos()" aria-label="Reset photos">↺</button>
+        <button class="header-btn camera-btn" id="cameraBtn" onclick="toggleCamera()" aria-label="Toggle camera"><span id="camIcon">📷</span></button>
       </div>
       <h1>Coquette Studio</h1>
-      <button class="header-btn" onclick="downloadFrame()">⬇</button>
+      <button class="header-btn" onclick="downloadFrame()" aria-label="Download frame">⬇</button>
     </header>
 
     <div class="preview-area">
@@ -843,11 +843,11 @@
       </div>
 
       <nav class="bottom-nav">
-        <button class="nav-item active" onclick="switchTab('filter')" id="tabFilter"><span>✨</span><span>Filter</span></button>
-        <button class="nav-item" onclick="switchTab('theme')" id="tabTheme"><span>🎨</span><span>Theme</span></button>
-        <button class="capture-btn" id="captureBtn" onclick="startCountdown()" disabled></button>
-        <button class="nav-item" onclick="switchTab('layout')" id="tabLayout"><span>⊞</span><span>Layout</span></button>
-        <button class="nav-item" onclick="switchTab('text')" id="tabText"><span>Aa</span><span>Text</span></button>
+        <button class="nav-item active" onclick="switchTab('filter')" id="tabFilter" aria-label="Filter panel"><span>✨</span><span>Filter</span></button>
+        <button class="nav-item" onclick="switchTab('theme')" id="tabTheme" aria-label="Theme panel"><span>🎨</span><span>Theme</span></button>
+        <button class="capture-btn" id="captureBtn" onclick="startCountdown()" disabled aria-label="Take photos"></button>
+        <button class="nav-item" onclick="switchTab('layout')" id="tabLayout" aria-label="Layout panel"><span>⊞</span><span>Layout</span></button>
+        <button class="nav-item" onclick="switchTab('text')" id="tabText" aria-label="Text panel"><span>Aa</span><span>Text</span></button>
       </nav>
     </div>
 
@@ -862,8 +862,8 @@
       <div class="fullscreen-photo-count" id="photoCount">1/4</div>
       <div class="mini-frame-preview" id="miniFramePreview"></div>
       <div class="fullscreen-controls">
-        <button class="fullscreen-cancel-btn" onclick="exitFullscreenCamera()">✕</button>
-        <button class="fullscreen-capture-btn" id="fullscreenCaptureBtn" onclick="fullscreenCapture()"></button>
+        <button class="fullscreen-cancel-btn" onclick="exitFullscreenCamera()" aria-label="Cancel capture">✕</button>
+        <button class="fullscreen-capture-btn" id="fullscreenCaptureBtn" onclick="fullscreenCapture()" aria-label="Take photo"></button>
         <div style="width:50px"></div>
       </div>
     </div>
@@ -882,6 +882,9 @@
       { id: 'magic', name: 'Magic', bg: 'linear-gradient(135deg, #1a1a2e, #0f0f1a)' },
       { id: 'xmark', name: 'X-Mark', bg: '#0a0a0a' },
       { id: 'classicbw', name: 'Classic', bg: '#ffffff' },
+      { id: 'yellow', name: 'Yellow', bg: '#f5d800' },
+      { id: 'red', name: 'Red', bg: '#c41e3a' },
+      { id: 'blue', name: 'Blue', bg: 'linear-gradient(180deg, #1a3a5c, #0d1f33)' },
       { id: 'spotify', name: 'Spotify', bg: 'linear-gradient(170deg, #1a1a35, #0a0a18)' },
       { id: 'newspaper', name: 'News', bg: '#f5f0e6' },
     ];
@@ -921,7 +924,7 @@
     ];
 
     // Default to white theme (index 0)
-    let photos = [], theme = themes[0], layout = layouts[1], filter = filters[0];
+    let photos = [], theme = themes[0], layout = layouts[1], selectedFilter = filters[0];
     let currentTab = 'filter', stream = null, cameraOn = false, isFullscreen = false;
     let customFrameColor = null;
 
@@ -1020,7 +1023,7 @@
 
     function renderFilters() {
       document.getElementById('filterScroll').innerHTML = filters.map(f =>
-        `<div class="filter-item ${f.id === filter.id ? 'active' : ''}" onclick="selectFilter('${f.id}')">
+        `<div class="filter-item ${f.id === selectedFilter.id ? 'active' : ''}" onclick="selectFilter('${f.id}')">
           <div class="filter-preview" style="filter:${f.css}"></div><span>${f.name}</span>
         </div>`).join('');
     }
@@ -1065,16 +1068,22 @@
       document.getElementById('panel' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
     }
 
-    function selectFilter(id) { filter = filters.find(f => f.id === id); renderFilters(); updatePreview(); }
+    function selectFilter(id) { selectedFilter = filters.find(f => f.id === id); renderFilters(); updatePreview(); }
+    // Themes that require full DOM rebuild due to special structure
+    const specialThemes = ['spotify', 'newspaper', 'film'];
+
     function selectTheme(id) {
+      const oldTheme = theme;
       theme = themes.find(t => t.id === id);
       customFrameColor = null; // Reset custom color when changing theme
       updateColorPickerVisibility();
       toggleTextInputs();
       renderThemes();
-      updatePreview();
+      // Force rebuild if switching to/from a special theme
+      const needsRebuild = specialThemes.includes(oldTheme.id) || specialThemes.includes(theme.id);
+      updatePreview(needsRebuild);
     }
-    function selectLayout(id) { layout = layouts.find(l => l.id === id); if (photos.length > layout.slots) photos = photos.slice(0, layout.slots); renderLayouts(); updatePreview(); }
+    function selectLayout(id) { layout = layouts.find(l => l.id === id); if (photos.length > layout.slots) photos = photos.slice(0, layout.slots); renderLayouts(); updatePreview(true); }
 
     function setFrameColor(color) {
       customFrameColor = color;
@@ -1110,14 +1119,16 @@
 
     function formatDate(dateStr) {
       if (!dateStr) return '';
-      const d = new Date(dateStr);
+      const parts = dateStr.split('-');
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
       const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
       return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2, '0')} ${d.getFullYear()}`;
     }
 
     function formatDateNumeric(dateStr) {
       if (!dateStr) return '';
-      const d = new Date(dateStr);
+      const parts = dateStr.split('-');
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
       return `${String(d.getMonth() + 1).padStart(2, '0')} ${String(d.getDate()).padStart(2, '0')} ${d.getFullYear()}`;
     }
 
@@ -1127,8 +1138,55 @@
       return layout.slots;
     }
 
-    function updatePreview() {
+    // Track last rendered state to avoid unnecessary DOM rebuilds
+    let lastRenderedState = null;
+
+    function getStateHash() {
+      return JSON.stringify({
+        theme: theme.id,
+        layout: layout.id,
+        filter: selectedFilter.id,
+        photosCount: photos.length,
+        cameraOn: cameraOn,
+        customFrameColor: customFrameColor
+      });
+    }
+
+    function updatePreview(forceRebuild = false) {
       const frame = document.getElementById('photoFrame');
+      const currentState = getStateHash();
+      const existingVideo = document.getElementById('liveVideo');
+
+      // If camera is on and only filter/theme styling changed, do a quick update
+      if (!forceRebuild && cameraOn && existingVideo && lastRenderedState) {
+        const lastState = JSON.parse(lastRenderedState);
+        const currState = JSON.parse(currentState);
+
+        // Check if only theme or filter changed (not layout, photos, or camera state)
+        if (lastState.layout === currState.layout &&
+            lastState.photosCount === currState.photosCount &&
+            lastState.cameraOn === currState.cameraOn) {
+
+          // Quick update: just change classes and styles without rebuilding DOM
+          frame.className = `photo-frame theme-${theme.id} layout-${layout.id}`;
+          if (customFrameColor && customColorThemes.includes(theme.id)) {
+            frame.style.background = customFrameColor;
+          } else {
+            frame.style.background = '';
+          }
+
+          // Update filter on video and images
+          existingVideo.style.filter = selectedFilter.css;
+          frame.querySelectorAll('.photo-slot img').forEach(img => {
+            img.style.filter = selectedFilter.css;
+          });
+
+          lastRenderedState = currentState;
+          return;
+        }
+      }
+
+      // Full rebuild needed
       frame.className = `photo-frame theme-${theme.id} layout-${layout.id}`;
       // Apply custom frame color if set and theme supports it
       if (customFrameColor && customColorThemes.includes(theme.id)) {
@@ -1150,9 +1208,9 @@
       let slotsHtml = '', liveAdded = false;
       for (let i = 0; i < effectiveSlots; i++) {
         if (photos[i]) {
-          slotsHtml += `<div class="photo-slot"><img src="${photos[i]}" style="filter:${filter.css}"><button class="remove-btn" onclick="removePhoto(${i})">✕</button></div>`;
+          slotsHtml += `<div class="photo-slot"><img src="${photos[i]}" style="filter:${selectedFilter.css}"><button class="remove-btn" onclick="removePhoto(${i})">✕</button></div>`;
         } else if (cameraOn && !liveAdded) {
-          slotsHtml += `<div class="photo-slot" id="liveSlot"><video id="liveVideo" autoplay playsinline muted style="filter:${filter.css}"></video><span class="live-badge">● LIVE</span><div class="countdown-overlay" id="countdown"></div><div class="flash-overlay" id="flash"></div></div>`;
+          slotsHtml += `<div class="photo-slot" id="liveSlot"><video id="liveVideo" autoplay playsinline muted style="filter:${selectedFilter.css}"></video><span class="live-badge">● LIVE</span><div class="countdown-overlay" id="countdown"></div><div class="flash-overlay" id="flash"></div></div>`;
           liveAdded = true;
         } else {
           slotsHtml += `<div class="photo-slot"><span class="placeholder">${i + 1}</span></div>`;
@@ -1227,6 +1285,8 @@
       }
       document.getElementById('captureBtn').disabled = !cameraOn || photos.length >= getEffectiveSlots();
       document.getElementById('captureBtn').classList.toggle('recording', cameraOn);
+
+      lastRenderedState = currentState;
     }
 
     function removePhoto(i) { photos.splice(i, 1); updatePreview(); }
@@ -1240,7 +1300,16 @@
         document.getElementById('camIcon').textContent = '⏹';
         document.getElementById('cameraBtn').classList.add('active');
         updatePreview();
-      } catch (e) { alert('Cannot access camera'); }
+      } catch (e) {
+        console.error('Camera access error:', e);
+        if (e.name === 'NotAllowedError') {
+          alert('Camera access was denied. Please allow camera access in your browser settings.');
+        } else if (e.name === 'NotFoundError') {
+          alert('No camera found on this device.');
+        } else {
+          alert('Cannot access camera: ' + e.message);
+        }
+      }
     }
     function stopCamera() {
       if (isFullscreen) exitFullscreenCamera();
@@ -1261,8 +1330,8 @@
       isFullscreen = true;
       fullscreenCamera.classList.add('active');
       fullscreenVideo.srcObject = stream;
-      fullscreenVideo.style.filter = filter.css;
-      filterIndicatorEl.textContent = filter.name;
+      fullscreenVideo.style.filter = selectedFilter.css;
+      filterIndicatorEl.textContent = selectedFilter.name;
 
       updatePhotoCount();
       updateMiniFramePreview();
@@ -1277,8 +1346,8 @@
     }
 
     function updatePhotoCount() {
-      const current = photos.length + 1;
       const total = getEffectiveSlots();
+      const current = Math.min(photos.length + 1, total);
       photoCountEl.textContent = `${current}/${total}`;
     }
 
@@ -1297,7 +1366,7 @@
 
       for (let i = 0; i < effectiveSlots; i++) {
         if (photos[i]) {
-          slotsHtml += `<div class="photo-slot"><img src="${photos[i]}" style="filter:${filter.css}"></div>`;
+          slotsHtml += `<div class="photo-slot"><img src="${photos[i]}" style="filter:${selectedFilter.css}"></div>`;
         } else if (i === photos.length) {
           slotsHtml += `<div class="photo-slot" style="background:var(--accent);opacity:0.6"><span class="placeholder" style="opacity:1;color:#fff;font-size:10px">LIVE</span></div>`;
         } else {
@@ -1394,9 +1463,10 @@
 
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
-      ctx.filter = filter.css;
+      ctx.filter = selectedFilter.css;
       ctx.drawImage(fullscreenVideo, 0, 0);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.filter = 'none';
 
       // Flash effect
       fullscreenFlash.classList.add('active');
@@ -1429,8 +1499,9 @@
       if (!v) return;
       canvas.width = v.videoWidth; canvas.height = v.videoHeight;
       ctx.translate(canvas.width, 0); ctx.scale(-1, 1);
-      ctx.filter = filter.css; ctx.drawImage(v, 0, 0);
+      ctx.filter = selectedFilter.css; ctx.drawImage(v, 0, 0);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.filter = 'none';
       const fl = document.getElementById('flash');
       if (fl) { fl.classList.add('active'); setTimeout(() => fl.classList.remove('active'), 150); }
       if (navigator.vibrate) navigator.vibrate(50);
@@ -1449,7 +1520,10 @@
         a.href = out.toDataURL('image/png');
         a.click();
         if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-      } catch (e) { alert('Download failed'); }
+      } catch (e) {
+        console.error('Download error:', e);
+        alert('Download failed: ' + e.message);
+      }
     }
 
     init();
