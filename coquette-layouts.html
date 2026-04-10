@@ -1513,11 +1513,53 @@
       if (photos.length >= getEffectiveSlots()) setTimeout(stopCamera, 500);
     }
 
+    function cropImageTocover(img, slotW, slotH) {
+      const canvas = document.createElement('canvas');
+      canvas.width = slotW;
+      canvas.height = slotH;
+      const ctx = canvas.getContext('2d');
+      const natW = img.naturalWidth, natH = img.naturalHeight;
+      const slotRatio = slotW / slotH, imgRatio = natW / natH;
+      let sx, sy, sw, sh;
+      if (imgRatio > slotRatio) {
+        sh = natH; sw = natH * slotRatio;
+        sx = (natW - sw) / 2; sy = 0;
+      } else {
+        sw = natW; sh = natW / slotRatio;
+        sx = 0; sy = (natH - sh) / 2;
+      }
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, slotW, slotH);
+      return canvas.toDataURL('image/jpeg', 0.95);
+    }
+
     async function downloadFrame() {
       if (cameraOn) stopCamera();
       await new Promise(r => setTimeout(r, 100));
       try {
-        const out = await html2canvas(document.getElementById('photoFrame'), { scale: 3, useCORS: true, backgroundColor: null });
+        const frame = document.getElementById('photoFrame');
+        const imgs = frame.querySelectorAll('.photo-slot img');
+        const originals = [];
+
+        // Replace object-fit:cover images with pre-cropped versions
+        imgs.forEach(img => {
+          const slot = img.parentElement;
+          const slotW = slot.offsetWidth;
+          const slotH = slot.offsetHeight;
+          if (img.naturalWidth && slotW && slotH) {
+            originals.push({ img, src: img.src, style: img.style.cssText });
+            img.src = cropImageTocover(img, slotW * 3, slotH * 3);
+            img.style.objectFit = 'fill';
+          }
+        });
+
+        const out = await html2canvas(frame, { scale: 3, useCORS: true, backgroundColor: null });
+
+        // Restore original images
+        originals.forEach(({ img, src, style }) => {
+          img.src = src;
+          img.style.cssText = style;
+        });
+
         const a = document.createElement('a');
         a.download = `coquette-${theme.id}-${layout.id}-${Date.now()}.png`;
         a.href = out.toDataURL('image/png');
